@@ -1,12 +1,13 @@
 # Project Docs
 
-A set of Markdown templates, writing guides, and filled-in samples for the three core documents of a software project:
+A set of Markdown templates, writing guides, and filled-in samples for the four core documents of a software project:
 
 | Document | Stands for | Answers | Written by |
 |----------|------------|---------|------------|
 | **PRD** | Product Requirements Document | *What* are we building, for whom, *why*, and how will we know it worked? | Product manager |
 | **DRD** | Design Requirement Document | *How* does it look and behave on screen? | UX / interaction designer |
-| **TRD** | Technical Requirements Document | *How* do we build and run it? | Technical lead |
+| **TRD** | Technical Requirements Document | *What architecture and technical targets?* The high-level design (HLD). | Tech lead |
+| **SDD** | Software Design Document | *How is each part built?* The low-level design (LLD) and the team's tech spec. | Engineers |
 
 Copy a template, read the matching guide, and look at the sample to see what a finished document looks like.
 
@@ -15,15 +16,29 @@ Copy a template, read the matching guide, and look at the sample to see what a f
 ```mermaid
 flowchart LR
   PRD[PRD\nWhat and why] --> DRD[DRD\nScreens and behavior]
-  PRD --> TRD[TRD\nArchitecture and delivery]
+  PRD --> TRD[TRD\nHigh-level design]
   DRD --> TRD
+  TRD --> SDD[SDD\nDetailed design]
 ```
 
 1. Write the **PRD** first: the problem, goals, users, requirements, and metrics.
 2. The **DRD** turns those requirements into structure, flows, wireframes, and page behavior.
-3. The **TRD** describes how to build it: architecture, data, APIs, security, testing, and rollout.
+3. The tech lead writes the **TRD**: architecture, decisions, data entities, interfaces, security, targets, and rollout. It is reviewed and approved before development.
+4. Engineers write the **SDD** underneath it: modules, flows, tables, endpoints, logic, error handling, and tests. They keep it up to date while building, and it ends as the record of what was built.
 
-Each later document links back to the earlier ones by ID (for example `US-001` in the PRD, `DR-003` in the DRD), so every design and technical decision can be traced to a requirement.
+Each later document links back to the earlier ones by ID (for example `US-001` in the PRD, `DR-003` in the DRD, a TRD section number in the SDD), so every design and technical decision can be traced to a requirement.
+
+## Terminology
+
+Words like "TRD" and "tech spec" mean different things at different companies. In this repo:
+
+| Term | Meaning here |
+|------|--------------|
+| **TRD** | The high-level design, written by the tech lead and approved before development. The approved baseline. |
+| **SDD** | The low-level design, written and updated by the engineers. Also called the **tech spec**. Required for every project, sized to the work. |
+| **HLD / LLD** | High-level design / low-level design. The TRD is the HLD; the SDD is the LLD. |
+
+**Update rule:** engineers change the SDD freely while they build. A change that affects the TRD (architecture, a decision, security, a target, or an interface other teams use) needs the tech lead's agreement, a line in the SDD's deviation log, and a TRD change-log entry.
 
 ## Repository structure
 
@@ -41,10 +56,14 @@ project_docs/
 │   ├── TRD_Template.md
 │   ├── TRD_Guide.md
 │   └── TRD_Sample_In-App_Feedback.md
+├── SDD/
+│   ├── SDD_Template.md
+│   ├── SDD_Guide.md
+│   └── SDD_Sample_In-App_Feedback.md
 └── README.md
 ```
 
-Every folder has the same three files:
+Every folder has the same three files (plus a Chinese `_zh` copy of each):
 
 | File | Purpose |
 |------|---------|
@@ -70,13 +89,21 @@ Describes the interaction design for UI and UX work.
 - **Guide** covers the PRD vs. DRD split, grayscale wireframe conventions, and how to specify every page state.
 - **Sample:** [DRD_Sample_In-App_Feedback.md](DRD/DRD_Sample_In-App_Feedback.md)
 
-### [TRD](TRD/): Technical Requirements Document
+### [TRD](TRD/): Technical Requirements Document (high-level design)
 
-Describes how the requirements will be built and operated.
+Sets the approved architecture and technical targets. Written by the tech lead.
 
-- **Template** covers traceability, system architecture and decisions, data model, technical functional requirements, APIs, events and messaging, security and threat model, non-functional targets, observability, testing, deployment and rollback, risks, and optional agent instructions.
-- **Guide** covers how to size the work, record decisions, design for failure, and set measurable targets.
+- **Template** covers traceability, system architecture and decisions, a high-level data model, feature-level technical requirements, an interface overview, events and reliability policy, security and threat model, non-functional targets, observability, testing strategy, deployment and rollback, risks, and the handoff to the SDD.
+- **Guide** covers the TRD vs. SDD split, how to size the work, record decisions, design for failure, and set measurable targets.
 - **Sample:** [TRD_Sample_In-App_Feedback.md](TRD/TRD_Sample_In-App_Feedback.md)
+
+### [SDD](SDD/): Software Design Document (low-level design / tech spec)
+
+Records how each part is built. Written and kept up to date by the engineers.
+
+- **Template** covers module and class design, key flows (sequence diagrams), field-level data design, interface detail, detailed logic, error handling, configuration, observability detail, test design, performance and capacity detail, a log of deviations from the TRD, agent instructions, and as-built notes.
+- **Guide** covers the update rule, how to size an SDD, and what to link rather than copy.
+- **Sample:** [SDD_Sample_In-App_Feedback.md](SDD/SDD_Sample_In-App_Feedback.md) (shown in progress, with two logged deviations)
 
 ## 中文版 (Chinese versions)
 
@@ -87,10 +114,11 @@ Every file has a Chinese translation next to it, named with a `_zh` suffix (for 
 | PRD | [PRD_Template_zh.md](PRD/PRD_Template_zh.md) | [PRD_Guide_zh.md](PRD/PRD_Guide_zh.md) | [PRD_Sample_In-App_Feedback_zh.md](PRD/PRD_Sample_In-App_Feedback_zh.md) |
 | DRD | [DRD_Template_zh.md](DRD/DRD_Template_zh.md) | [DRD_Guide_zh.md](DRD/DRD_Guide_zh.md) | [DRD_Sample_In-App_Feedback_zh.md](DRD/DRD_Sample_In-App_Feedback_zh.md) |
 | TRD | [TRD_Template_zh.md](TRD/TRD_Template_zh.md) | [TRD_Guide_zh.md](TRD/TRD_Guide_zh.md) | [TRD_Sample_In-App_Feedback_zh.md](TRD/TRD_Sample_In-App_Feedback_zh.md) |
+| SDD | [SDD_Template_zh.md](SDD/SDD_Template_zh.md) | [SDD_Guide_zh.md](SDD/SDD_Guide_zh.md) | [SDD_Sample_In-App_Feedback_zh.md](SDD/SDD_Sample_In-App_Feedback_zh.md) |
 
 ## About the samples
 
-All three samples describe the **same fictional feature**: an In-App Feedback Center for "LearnSphere", an online learning platform. This lets you follow one idea from requirement to design to implementation. The company, people, and numbers are invented, and the tech stack and integrations are illustrations, not recommendations.
+All four samples describe the **same fictional feature**: an In-App Feedback Center for "LearnSphere", an online learning platform. This lets you follow one idea from requirement to design to high-level design to detailed design. The company, people, and numbers are invented, and the tech stack and integrations are illustrations, not recommendations.
 
 ## How to use this repo
 

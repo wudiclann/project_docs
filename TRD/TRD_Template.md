@@ -3,22 +3,24 @@
 | | |
 |---|---|
 | **Version** | v0.1 (Draft) |
-| **Author** | [Name] |
-| **Technical lead** | [Name] |
+| **Author (tech lead)** | [Name] |
 | **Architect / reviewers** | [Names] |
 | **Status** | Draft / In Review / Approved |
 | **Last updated** | [YYYY-MM-DD] |
 | **Related PRD** | [Link, with version] |
 | **Related DRD** | [Link, with version] |
+| **Related SDD** | [Link to the engineers' detailed design] |
 | **Repository / design docs** | [Links] |
 
 > **How to use this template**
-> - Replace everything in `[brackets]`. Delete guidance lines (blockquotes) and sections that don't apply once you've decided.
-> - The PRD says **what and why**; the DRD says **how it looks and behaves on screen**; the TRD says **how we build it**. Link to them instead of repeating them.
+> - The TRD is the **high-level design (HLD)**. It is written by the **tech lead**, reviewed, and approved before development. It sets the architecture, constraints, interfaces, and targets. The engineers' **SDD** (the low-level design) holds the detail underneath.
+> - The PRD says **what and why**; the DRD says **how it looks and behaves on screen**; the TRD says **what architecture and technical targets**; the SDD says **how each part is built**. Link to them instead of repeating them.
 > - Every technical requirement should trace to a PRD or DRD item (use the IDs, e.g., US-001, DR-003) or to a non-functional need.
 > - Prefer numbers to adjectives ("p95 < 300 ms", not "fast"). If a value isn't decided yet, put it in Open Questions with an owner and a date.
 > - Record significant choices as decisions (Section 2.4) with the options you rejected, so future readers know why.
-> - Sections marked *(optional)* can be skipped for small changes. A suggested Quick set is: 1, 2.1, 3, 5, 6, 8, 11.
+> - Keep this document at the level a reviewer needs to judge whether the design is sound. Field-level tables, endpoint-by-endpoint specs, algorithms, and test cases belong in the SDD.
+> - Engineers may correct detail in the SDD freely. Changes to anything in this document need the tech lead's agreement and a line in the change log (see Section 14).
+> - Sections marked *(optional)* can be skipped for small changes. A suggested Quick set is: 1, 2.1, 3, 5, 8, 11, 14.
 > - Diagrams use Mermaid, which renders in GitHub, Notion, Obsidian, and most modern Markdown tools.
 
 ---
@@ -31,13 +33,13 @@
 
 ### 1.2 Requirement Traceability
 
-> Map each product or design requirement to the technical sections that implement it.
+> Map each product or design requirement to the technical sections that address it.
 
 | Source | ID | Summary | TRD section |
 |--------|----|---------|-------------|
 | PRD | US-001 | [Story summary] | 4.1, 5.1 |
 | PRD | OBJ-001 | [Objective that drives a technical need] | 9.1 |
-| DRD | DR-003 | [Design requirement with a technical impact] | 5.2 |
+| DRD | DR-003 | [Design requirement with a technical impact] | 4.1 |
 
 ### 1.3 Technical Scope
 
@@ -108,7 +110,9 @@ flowchart LR
 
 ---
 
-## 3. Data Model
+## 3. Data Model (High Level)
+
+> Entities, relationships, and the data lifecycle. Field-level tables, indexes, and migrations go in the SDD.
 
 ### 3.1 Entities and Relationships
 
@@ -118,63 +122,46 @@ erDiagram
   ORDER ||--|{ ORDER_ITEM : contains
   USER {
     uuid id PK
-    string email
-    datetime created_at
   }
   ORDER {
     uuid id PK
     uuid user_id FK
-    string status
   }
   ORDER_ITEM {
     uuid id PK
     uuid order_id FK
-    int quantity
   }
 ```
 
 > Use underscores in entity names (`ORDER_ITEM`), not hyphens.
 
-### 3.2 Entity Details
+### 3.2 Key Entities
 
-| Entity | Field | Type | Required | Constraints | Notes |
-|--------|-------|------|----------|-------------|-------|
-| [Entity] | [field] | [type] | Yes / No | [Unique, FK, max length, enum values] | [PII? default? source?] |
+| Entity | Purpose | Key attributes | Personal data? | System of record |
+|--------|---------|----------------|----------------|------------------|
+| [Entity] | [What it represents] | [A few important attributes] | Yes / No | [This service / external system] |
 
-### 3.3 Indexing and Query Patterns
-
-| Query / access pattern | Index | Expected volume | Notes |
-|------------------------|-------|-----------------|-------|
-| [e.g., List a user's reports, newest first] | [(user_id, created_at DESC)] | [reads / day] | [ ] |
-
-### 3.4 Data Lifecycle
+### 3.3 Data Lifecycle
 
 | Data | Retention | Deletion / anonymization | Backup and recovery |
 |------|-----------|--------------------------|---------------------|
-| [Data set] | [e.g., 12 months] | [Scheduled job; deletion request within 30 days] | [RPO / RTO] |
-
-### 3.5 Migration and Seeding
-
-- **Tool**: [Flyway / Liquibase / Prisma Migrate / other]
-- **Strategy**: [e.g., expand → migrate → contract; zero-downtime]
-- **Rollback**: [How to reverse each migration]
-- **Backfill**: [Existing data that needs converting, and how]
+| [Data set] | [e.g., 12 months] | [Scheduled job; deletion requests within 30 days] | [RPO / RTO] |
 
 ---
 
 ## 4. Technical Functional Requirements
 
-> Repeat this block for each feature or capability. These are the technical counterpart of the PRD's feature specifications.
+> One block per feature, at the level a reviewer needs. Inputs, validation, algorithms, and error details go in the SDD.
 
 ### 4.1 [Feature / capability name]
 
 - **Traces to**: [US-001, DR-002]
 - **Priority**: P0 / P1 / P2
 - **Description**: [What the system does, in technical terms]
-- **Inputs**: [Fields, types, limits, sources]
-- **Outputs**: [Results, side effects, events emitted]
-- **Validation rules**: [Server-side checks; limits; allowed values]
-- **State transitions**:
+- **Key rules**:
+  - [Rule that shapes the design, e.g., "Reports are stored first; the external ticket is created asynchronously"]
+  - [Limits and permissions that matter, e.g., rate limit, who may call it]
+- **Lifecycle** *(if the main object has states)*:
 
 ```mermaid
 stateDiagram-v2
@@ -185,13 +172,12 @@ stateDiagram-v2
   Resolved --> [*]
 ```
 
-- **Error handling**: [Each failure case → behavior, error code, retry or fallback]
-- **Side effects**: [Notifications, third-party calls, audit entries]
-- **Idempotency**: [How repeated requests are handled]
+- **Key failure behavior**: [One line per important failure, e.g., "External service down → request still succeeds; sync retried later"]
+- **Detail in SDD**: [Section number]
 
 ---
 
-## 5. Interface Specifications
+## 5. Interface Overview
 
 ### 5.1 API Overview
 
@@ -200,41 +186,17 @@ stateDiagram-v2
 | `/v1/[resource]` | POST | [Create …] | [Bearer token, role] | Yes (key header) | [e.g., 10 / 24 h per user] |
 | `/v1/[resource]/{id}` | GET | [Read …] | [Auth] | Yes | [ ] |
 
-### 5.2 Endpoint Details
+> Request and response schemas are in the SDD (or in the generated OpenAPI file).
 
-> Repeat per endpoint.
+### 5.2 Error Code Convention
 
-#### `POST /v1/[resource]`
-
-**Request**
-
-```json
-{
-  "field": "value"
-}
-```
-
-| Field | Type | Required | Validation |
-|-------|------|----------|------------|
-| field | string | Yes | [10–1000 chars] |
-
-**Response (201)**
-
-```json
-{
-  "id": "uuid",
-  "reference": "string"
-}
-```
-
-**Errors**
-
-| HTTP | Code | Condition | Client behavior |
-|------|------|-----------|-----------------|
-| 400 | VAL-001 | [Missing or invalid field] | [Show field message] |
-| 401 | AUTH-001 | [Token expired] | [Re-authenticate] |
-| 429 | RATE-001 | [Limit exceeded] | [Show limit message] |
-| 503 | SYS-001 | [Dependency unavailable] | [Queue and retry] |
+| Item | Convention |
+|------|------------|
+| Format | `CATEGORY-NNN` (e.g., `VAL-001`, `AUTH-001`, `RATE-001`, `STATE-001`, `SYS-001`) |
+| Categories | [VAL = validation, AUTH = authentication or authorization, RATE = limits, STATE = invalid state, SYS = system] |
+| HTTP mapping | [e.g., VAL → 400, AUTH → 401 / 403, RATE → 429, STATE → 409, SYS → 503] |
+| Wording | [Clients map codes to message keys; the full catalog is in the SDD] |
+| Information leaks | [e.g., return 404, not 403, for resources the caller doesn't own] |
 
 ### 5.3 Versioning and Compatibility
 
@@ -254,19 +216,23 @@ stateDiagram-v2
 
 ### 6.1 Topology
 
-| Topic / queue | Producer | Consumer(s) | Payload (schema link) | Ordering needed? |
-|---------------|----------|-------------|-----------------------|------------------|
-| `[domain.entity.event.v1]` | [Service] | [Service(s)] | [Link] | Yes / No |
+| Topic / queue | Producer | Consumer(s) | Ordering needed? |
+|---------------|----------|-------------|------------------|
+| `[domain.entity.event.v1]` | [Service] | [Service(s)] | Yes / No |
 
-### 6.2 Reliability Rules
+> Payload schemas are in the SDD.
 
-| Item | Rule |
-|------|------|
+### 6.2 Reliability Policy
+
+| Item | Policy |
+|------|--------|
 | Delivery guarantee | [At-least-once / exactly-once / at-most-once] |
-| Retry | [e.g., 5 retries, exponential backoff, over 1 hour] |
+| Retry | [e.g., 5 retries over about 1 hour; which errors are retried] |
 | Dead-letter queue | [Where messages go; who reviews; alert threshold] |
-| Idempotency | [Consumer dedupes on message ID or idempotency key] |
-| Schema evolution | [Additive changes only; version in topic name] |
+| Idempotency | [Principle, e.g., consumers dedupe on message ID or idempotency key] |
+| Schema evolution | [Additive changes only; version in the name] |
+
+> Exact delays, payloads, and consumer logic are in the SDD.
 
 ---
 
@@ -278,7 +244,7 @@ stateDiagram-v2
 |------|--------|
 | Authentication | [OAuth2 / OIDC / session token; token lifetime] |
 | Authorization model | [RBAC roles and what each can do; resource-level checks] |
-| Service-to-service auth | [mTLS / signed tokens] |
+| Service-to-service | [mTLS / signed tokens] |
 
 ### 7.2 Data Protection
 
@@ -336,39 +302,43 @@ stateDiagram-v2
 | [Latency p95] | [< 300 ms] | [Warn at 400 ms for 5 min] |
 | [Error rate] | [< 1%] | [P1 when > 1% for 5 min] |
 
-### 9.2 Logging, Metrics, Tracing
+### 9.2 Logging, Metrics, and Tracing Requirements
 
 | Type | Requirement |
 |------|-------------|
 | Logs | [Structured JSON; request ID; no personal data or secrets] |
-| Metrics | [Request rate, errors, latency, queue depth, retry count, DLQ size] |
-| Tracing | [OpenTelemetry; trace ID propagated across services] |
+| Metrics | [Categories: request rate, errors, latency, queue depth, retries, dead-letter size] |
+| Tracing | [OpenTelemetry; trace ID propagated across services and queues] |
 | Dashboards | [What each team needs to see] |
+
+> Log fields, metric names, and span names are in the SDD.
 
 ### 9.3 Alerting and On-Call
 
 | Alert | Threshold | Severity | Owner | Runbook |
 |-------|-----------|----------|-------|---------|
-| [DLQ not empty] | [> 0 for 15 min] | [P2] | [Team] | [Link] |
+| [Dead-letter queue not empty] | [> 0 for 15 min] | [P2] | [Team] | [Link] |
 
 ---
 
-## 10. Testing Plan
+## 10. Testing Strategy
 
 | Level | Scope | Target / criteria | Owner |
 |-------|-------|-------------------|-------|
-| Unit | [Business rules, validation] | [e.g., ≥ 80% line coverage on new code; all rules in 4.x covered] | [Dev] |
+| Unit | [Business rules, validation] | [e.g., ≥ 80% line coverage on new code] | [Dev] |
 | Contract | [API and event schemas between services] | [No breaking change passes CI] | [Dev] |
-| Integration | [Service ↔ DB, queue, external APIs (sandbox)] | [All paths in 4.x and 5.x] | [Dev / QA] |
+| Integration | [Service ↔ DB, queue, external APIs (sandbox)] | [All main flows] | [Dev / QA] |
 | End-to-end | [Critical user flows from the DRD] | [Each PRD acceptance criterion automated or manually verified] | [QA] |
 | Performance | [Load, spike, soak] | [Meets Section 8 targets at 3× expected volume] | [Dev / SRE] |
 | Security | [SAST, dependency scan, pen test, authz tests] | [No high / critical findings open] | [Security] |
 | Resilience | [Dependency outage, retry, DLQ] | [No lost reports; recovery in N min] | [Dev / SRE] |
 
+> Concrete test cases are in the SDD.
+
 **Mapping from PRD acceptance criteria**
 
-| PRD criterion | Test level | Test ID / location |
-|---------------|-----------|--------------------|
+| PRD criterion | Test level | Notes |
+|---------------|-----------|-------|
 | AC-1 | E2E, Integration | [ ] |
 
 ---
@@ -418,30 +388,27 @@ stateDiagram-v2
 
 ---
 
-## 14. Agent Instructions *(optional)*
+## 14. Detailed Design Handoff
 
-> Include this block if an AI coding agent will implement from this TRD. It limits the agent's context and states hard rules.
+> The SDD is where engineers record how each part is built. This section says who owns it and how it stays consistent with this TRD.
 
-### 14.1 Context Scoping
+### 14.1 SDD Ownership
 
-- **Start from**: [Entry-point files / directories]
-- **Read before coding**: [Coding standards, architecture notes, schema files]
-- **Do not touch**: [Generated code, unrelated services]
+| SDD | Owner (engineer) | Components covered | Reviewer |
+|-----|------------------|--------------------|----------|
+| [SDD name / link] | [Name] | [Components from Section 2.2] | [Tech lead] |
 
-### 14.2 Implementation Constraints
+### 14.2 Rules for Changes
 
-- **Required**: [e.g., use the shared validation library; add tests with every endpoint]
-- **Prohibited**: [e.g., no new dependencies without approval; no raw SQL string building; no secrets in code]
+- **Engineers may change freely** (in the SDD): detail inside a component, such as module structure, field-level design, algorithms, configuration values, and test cases.
+- **Needs the tech lead's agreement** (and a TRD update): anything that changes the architecture, a decision in Section 2.4, security design, a target in Section 8, or an interface other teams depend on.
+- Every such change is recorded in the SDD's deviation log and in this document's change log.
 
-### 14.3 Verification Commands
+### 14.3 Changes Since Approval
 
-```bash
-# Replace with your project's commands
-[unit test command]
-[contract test command]
-[lint / type-check command]
-[build command]
-```
+| ID | What changed | SDD reference | Approved by | Date |
+|----|--------------|---------------|-------------|------|
+| [DEV-001] | [Summary] | [SDD 12] | [Tech lead] | [Date] |
 
 ---
 
@@ -450,14 +417,15 @@ stateDiagram-v2
 Before approval, confirm:
 
 - [ ] Every PRD/DRD requirement that has a technical impact appears in 1.2
-- [ ] Architecture diagram, components, and data model agree with each other
-- [ ] Every API has request, response, errors, auth, and rate limit defined
-- [ ] Schemas and events are versioned; compatibility rules are stated
-- [ ] Failure paths (timeouts, retries, outages) are specified, not just success
+- [ ] Architecture diagram, components, and data entities agree with each other
+- [ ] Every API has purpose, auth, idempotency, and rate limit defined
+- [ ] Error code convention, versioning, and compatibility rules are stated
+- [ ] Failure paths (timeouts, retries, outages) are described, not just success
 - [ ] Threat model covers the real data flows; each threat has a mitigation and a test
 - [ ] Non-functional targets are numbers with a verification method
 - [ ] SLOs, alerts, and runbooks exist for launch
-- [ ] Rollout and rollback plans are written and rehearsed
+- [ ] Rollout and rollback plans are written
+- [ ] The SDD owner and the change rules are named (Section 14)
 - [ ] Open questions have owners and dates; no `[brackets]` remain
 
 ---
@@ -478,7 +446,7 @@ Before approval, confirm:
 
 ### 16.3 References
 
-- [PRD, DRD, ADR files, vendor docs, benchmarks, incident reports]
+- [PRD, DRD, SDD, ADR files, vendor docs, benchmarks, incident reports]
 
 ### 16.4 Change Log
 

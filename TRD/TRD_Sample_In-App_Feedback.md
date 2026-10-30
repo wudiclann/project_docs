@@ -1,17 +1,17 @@
 # In-App Feedback Center — Technical Requirements Document (TRD)
 
-> **Sample document.** This is a fictional, filled-in example of `TRD_Template.md`. It is the engineering companion to [PRD_Sample_In-App_Feedback.md](../PRD/PRD_Sample_In-App_Feedback.md) and [DRD_Sample_In-App_Feedback.md](../DRD/DRD_Sample_In-App_Feedback.md), so the product ("LearnSphere"), people, limits, and tech stack match those documents. Systems, volumes, and thresholds are invented for illustration; where a number is an assumption, it says so.
+> **Sample document.** This is a fictional, filled-in example of `TRD_Template.md`. It is the high-level design written by the tech lead, and it sits between [PRD_Sample_In-App_Feedback.md](../PRD/PRD_Sample_In-App_Feedback.md) / [DRD_Sample_In-App_Feedback.md](../DRD/DRD_Sample_In-App_Feedback.md) and the engineers' detailed design in [SDD_Sample_In-App_Feedback.md](../SDD/SDD_Sample_In-App_Feedback.md). The product ("LearnSphere"), people, limits, and tech stack match those documents. Systems, volumes, and thresholds are invented; where a number is an assumption, it says so. Product UI strings (for example "Please choose an issue type") stay in English because the sample product launches in English.
 
 | | |
 |---|---|
-| **Version** | v1.0 |
-| **Author** | Daniel Ortiz, Engineering Lead |
-| **Technical lead** | Daniel Ortiz |
+| **Version** | v1.1 |
+| **Author (tech lead)** | Daniel Ortiz, Engineering Lead |
 | **Architect / reviewers** | Platform architecture group; Identity team; Support Ops (Lena Fischer); Security (reviewer on call) |
 | **Status** | Approved |
-| **Last updated** | 2026-10-29 |
+| **Last updated** | 2026-10-30 |
 | **Related PRD** | In-App Feedback Center PRD v1.0 (2026-10-15) |
 | **Related DRD** | In-App Feedback Center DRD v1.0 (2026-10-28) |
+| **Related SDD** | In-App Feedback Center SDD (in progress, v0.3) |
 | **Repository / design docs** | `learnsphere/feedback-service` (new); ADRs in `docs/adr/` |
 
 ---
@@ -26,16 +26,16 @@ Build a new `feedback-service` that receives problem reports from the mobile and
 
 | Source | ID | Summary | TRD section |
 |--------|----|---------|-------------|
-| PRD | US-001, US-002 | Report from the lesson with screenshots | 4.1, 5.2 |
-| PRD | US-003 | Context attached to every report | 4.2, 3.2 |
-| PRD | US-004 | Learner sees report status | 4.3, 5.2 |
+| PRD | US-001, US-002 | Report from the lesson with screenshots | 4.1, 5.1 |
+| PRD | US-003 | Context attached to every report | 4.2 |
+| PRD | US-004 | Learner sees report status | 4.3, 5.1 |
 | PRD | US-005 | Notifications on update | 4.4 |
 | PRD | US-006 | Feedback categorized for Product | 4.2, 9.2 |
 | PRD | US-007 | Resolution rating | 4.5 |
 | PRD | OBJ-003 | Median first useful response 38 h → 12 h | 4.2 (routing), 8 |
-| PRD | 3.3.1 | Rate limit 10 reports / 24 h | 4.1, 5.2 |
+| PRD | 3.3.1 | Rate limit 10 reports / 24 h | 4.1, 5.1 |
 | PRD | 3.3.2 | Zendesk down → retry 5 times over 1 hour, then alert | 6.2 |
-| PRD | 6.3 | Encryption, audited access, 12-month retention, deletion within 30 days | 3.4, 7 |
+| PRD | 6.3 | Encryption, audited access, 12-month retention, deletion within 30 days | 3.3, 7 |
 | PRD | 5.2 | Submit < 3 s p95; API 99.9%; no lost reports | 8 |
 | DRD | DR-004 | Offline draft sent automatically within 60 s | 4.1, 5.3 |
 | DRD | DR-006 | Notification deep link to report detail | 4.4 |
@@ -54,8 +54,8 @@ Build a new `feedback-service` that receives problem reports from the mobile and
 | Constraint | Must use the existing Zendesk instance and API | No alternative ticketing; limits fixed by plan | Confirm plan rate limit with Support Ops by 2026-11-02 |
 | Constraint | Stack is fixed by PRD 6.1: React Native 0.76, React 18, NestJS, PostgreSQL 15, S3, SQS | None | n/a |
 | Assumption | Expected volume ≈ 210 reports/day at launch (85,000 subscribers ÷ 60 days between issues ≈ 1,400 issue events/day × 15% target submission rate) | Under-sizing | Re-check at 10% rollout; load test at 3× (≈ 640/day) and burst of 10 reports/s |
-| Assumption | A major playback outage could cause a short burst of reports (design target: sustain 10 reports/s for 10 minutes) | Zendesk limit reached; delayed tickets | Burst test in staging; queue absorbs overflow |
-| Dependency | Zendesk custom fields created by Support Ops before QA | Blocks integration tests | Requested; due 2026-11-06 |
+| Assumption | A major playback outage could cause a short burst of reports (design target: accept 10 reports/s for 10 minutes) | Zendesk limit reached; delayed tickets | Burst test in staging; queue absorbs overflow |
+| Dependency | Zendesk custom fields created by Support Ops before QA | Blocks integration testing | Requested; due 2026-11-06 |
 | Dependency | Auth service exposes plan type to services | Cannot restrict to paying users | Identity team confirmed JWT claim `plan` |
 
 ---
@@ -134,7 +134,7 @@ flowchart LR
 
 ---
 
-## 3. Data Model
+## 3. Data Model (High Level)
 
 ### 3.1 Entities and Relationships
 
@@ -147,87 +147,37 @@ erDiagram
     uuid id PK
     string reference UK
     uuid user_id
-    string issue_type
-    string status
-    string zendesk_ticket_id
-    datetime created_at
   }
   FEEDBACK_ATTACHMENT {
     uuid id PK
     uuid report_id FK
-    string s3_key
-    int size_bytes
   }
   FEEDBACK_REPLY {
     uuid id PK
     uuid report_id FK
-    string agent_first_name
-    datetime posted_at
   }
   FEEDBACK_RATING {
     uuid id PK
     uuid report_id FK
-    boolean helped
   }
 ```
 
-### 3.2 Entity Details
+### 3.2 Key Entities
 
-**`feedback_report`**
+| Entity | Purpose | Key attributes | Personal data? | System of record |
+|--------|---------|----------------|----------------|------------------|
+| `feedback_report` | One learner problem report | Reference `FB-YYYYMMDD-NNNN`, user, issue type, description, context (course, lesson, device, app version), status, queue, ticket ID | Yes (user, description, email, device info) | This service |
+| `feedback_attachment` | A screenshot linked to a report (max 3, ≤ 5 MB) | Object key, content type, size | Yes (images) | This service (S3 holds the file) |
+| `feedback_reply` | A public agent reply mirrored from Zendesk | Agent first name, body, time | Yes (message body) | Zendesk (mirrored here) |
+| `feedback_rating` | The learner's "did this help" answer, one per resolution | Helped yes / no, optional comment | Yes (comment) | This service |
 
-| Field | Type | Required | Constraints | Notes |
-|-------|------|----------|-------------|-------|
-| id | uuid | Yes | PK | |
-| reference | text | Yes | Unique; format `FB-YYYYMMDD-NNNN` | Generated from a per-day counter (see 4.1) |
-| user_id | uuid | Yes | Indexed | From JWT `sub`; **personal data** |
-| idempotency_key | uuid | Yes | Unique with `user_id` | Prevents duplicates |
-| plan_type | text | Yes | | From JWT |
-| issue_type | text | Yes | Enum: `video_audio`, `quiz_grading`, `course_content`, `billing`, `app_bug`, `other` | |
-| description | text | Yes | 10–1,000 characters | **Personal data** |
-| reply_email | text | Yes | Valid email, ≤ 254 chars | **Personal data** |
-| course_id, lesson_id | text | No | | Present when opened from player or quiz |
-| device_model, os_version, app_version, locale | text | Yes | | Context captured (PRD 3.3.2) |
-| client_submitted_at | timestamptz | Yes | | Client timestamp; `created_at` is server time |
-| status | text | Yes | Enum: `received`, `in_progress`, `resolved`; default `received` | Mapped from Zendesk |
-| queue | text | Yes | Enum: `billing`, `general` | Billing issues route to Billing |
-| priority | boolean | Yes | Default false | True if certificate deadline within 7 days |
-| zendesk_ticket_id | text | No | Unique when set | Set by worker |
-| sync_state | text | Yes | Enum: `pending`, `synced`, `failed` | Alerting uses `failed` |
-| created_at, updated_at, resolved_at | timestamptz | Yes / Yes / No | | |
-| deleted_at | timestamptz | No | | Soft delete before purge |
-
-**`feedback_attachment`**: `id`, `report_id` (FK), `s3_key`, `content_type` (`image/png` or `image/jpeg`), `size_bytes` (≤ 5,242,880), `created_at`. Max 3 per report (enforced in the service).
-
-**`feedback_reply`**: `id`, `report_id` (FK), `zendesk_comment_id` (unique), `agent_first_name`, `body` (public comments only), `posted_at`.
-
-**`feedback_rating`**: `id`, `report_id` (FK), `helped` (boolean), `comment` (≤ 300 characters, optional), `created_at`. One per resolution cycle (unique on `report_id` + `resolution_seq`).
-
-**`reference_counter`**: `day` (date, PK), `last_value` (int). Incremented inside the submit transaction with `INSERT … ON CONFLICT DO UPDATE … RETURNING`.
-
-### 3.3 Indexing and Query Patterns
-
-| Query / access pattern | Index | Expected volume | Notes |
-|------------------------|-------|-----------------|-------|
-| List a learner's reports, newest first (last 12 months) | `(user_id, created_at DESC)` where `deleted_at IS NULL` | ~1 read per report view; low | Cursor pagination, 20 per page |
-| Count a learner's reports in last 24 h (rate limit) | Same index | One per submit | Also used for rate-limit check |
-| Find by Zendesk ticket (webhook) | Unique `zendesk_ticket_id` | One per Zendesk event | |
-| Find by idempotency key | Unique `(user_id, idempotency_key)` | One per submit | |
-| Product analysis: counts by type, course, week | `(issue_type, created_at)`, `(course_id, created_at)` | Dashboards, periodic | Run on a read replica |
-
-### 3.4 Data Lifecycle
+### 3.3 Data Lifecycle
 
 | Data | Retention | Deletion / anonymization | Backup and recovery |
 |------|-----------|--------------------------|---------------------|
-| Reports, replies, ratings | 12 months from `created_at` | Daily job hard-deletes rows older than 12 months | Daily snapshots, 14 days; RPO 5 min via PITR, RTO 1 h |
+| Reports, replies, ratings | 12 months from creation | Daily job hard-deletes rows older than 12 months | Daily snapshots, 14 days; RPO 5 min via PITR, RTO 1 h |
 | Attachments (S3) | 12 months | S3 lifecycle rule at 12 months + job deletes keys for deleted reports | Versioning off; no backup copy of screenshots |
 | Account deletion / GDPR / CCPA request | Within 30 days (target 7 days) | Event from the privacy service triggers deletion of all reports and attachments for the user and removal of the Zendesk ticket's personal fields | Deletion logged in the audit log (IDs only) |
-
-### 3.5 Migration and Seeding
-
-- **Tool**: Flyway, versioned SQL files in the service repo.
-- **Strategy**: all migrations are additive in v1 (new schema); future changes use expand → migrate → contract.
-- **Rollback**: down scripts for each migration; the schema is new, so rollback = drop after confirming no data to keep (during rollout, disable the flag instead).
-- **Backfill**: none; no existing feedback data is imported.
 
 ---
 
@@ -237,16 +187,15 @@ erDiagram
 
 - **Traces to**: US-001, US-002, DR-002, DR-004
 - **Priority**: P0
-- **Description**: Accept a report from a paying learner, store it durably, and enqueue Zendesk ticket creation.
-- **Inputs**: issue type, description, reply email, attachment keys (0–3), context fields, client timestamp, idempotency key. User identity and plan come from the JWT.
-- **Outputs**: `201` with `id` and `reference`; row in `feedback_report` (status `received`, `sync_state` `pending`); outbox message to `zendesk-sync`; message to `notifications` (acknowledgment).
-- **Validation rules**:
-  - Plan must be a paying plan, else `403 AUTH-002`.
-  - `issue_type` in the enum; description 10–1,000 characters; email valid.
-  - Each attachment key must belong to this user's upload prefix; S3 `HEAD` confirms size ≤ 5 MB and type PNG/JPG; maximum 3.
-  - Rate limit: count of this user's reports in the last 24 h must be < 10, else `429 RATE-001`.
-  - Same `(user_id, idempotency_key)` as an existing report returns the original `201` response (no new report).
-- **State transitions**:
+- **Description**: Accept a report from a paying learner, store it durably, and queue Zendesk ticket creation.
+- **Key rules**:
+  - Only paying learners may submit; the plan comes from the session token.
+  - At most 10 reports per learner in any 24 hours.
+  - Up to 3 PNG or JPG screenshots of at most 5 MB each, uploaded directly to S3 and verified by the service before the report is accepted.
+  - The client sends an idempotency key, so a repeated request returns the original result instead of creating a second report.
+  - Each report gets a reference `FB-YYYYMMDD-NNNN`.
+  - The report is stored first; the Zendesk ticket is created asynchronously (ADR-001).
+- **Lifecycle**:
 
 ```mermaid
 stateDiagram-v2
@@ -257,53 +206,58 @@ stateDiagram-v2
   Resolved --> [*]: after 12 months, deleted
 ```
 
-- **Error handling**: validation failures return `400` with the field; Zendesk is not called in this request, so its outages do not affect the response. If the database is unavailable, return `503 SYS-001`; the client keeps the draft and retries.
-- **Side effects**: outbox → `zendesk-sync`; acknowledgment notification within 5 minutes (typically < 30 s); Amplitude `feedback_submit` is sent by the client, not the server.
-- **Idempotency**: by idempotency key (above). The reference counter increment and the report insert share one transaction, so a failed insert does not burn a reference number.
+- **Key failure behavior**: Invalid input → a validation error naming the field. Database unavailable → the request fails with a retryable error and the client keeps a draft. Zendesk down → the request still succeeds; the ticket is created later.
+- **Detail in SDD**: 3.1, 5.1, 6.1
 
 ### 4.2 Context Capture and Routing
 
 - **Traces to**: US-003, US-006, OBJ-002, OBJ-003
 - **Priority**: P0
-- **Description**: The worker creates a Zendesk ticket with the report's context as custom fields and tags, and routes it.
-- **Business rules**:
-  - `billing` → Billing queue (group ID from config); all others → General Support.
-  - If the learner has a certificate deadline within 7 days (read from the learner API at submit time), set `priority = true` and tag `priority`; if that call fails or times out (500 ms), skip the tag rather than fail the submit.
-  - Tags: issue type, `app-feedback`, `plan-<type>`.
-  - Custom fields: reference, course, lesson, device, OS, app version, locale, user ID.
-  - Attachments are added as Zendesk uploads from S3 (streamed, not stored in Zendesk beyond the ticket).
-- **Error handling**: see 6.2 for retries; after final failure `sync_state = failed`, message goes to the DLQ, and an alert goes to Support Ops.
-- **Side effects**: on success, store `zendesk_ticket_id`, set `sync_state = synced`.
+- **Description**: The worker creates a Zendesk ticket carrying the report's context and routes it.
+- **Key rules**:
+  - Billing issues go to the Billing queue; all others go to General Support.
+  - Tickets from learners with a certificate deadline within 7 days get a `priority` tag. The worker looks this up from the learner API when it creates the ticket (500 ms timeout); if the lookup fails, the tag is skipped (SDD DEV-002).
+  - Tickets carry issue-type and plan tags and custom fields for reference, course, lesson, device, OS, app version, locale, and user ID.
+  - Attachments are copied from S3 to the ticket.
+- **Key failure behavior**: Retry for about 1 hour (6.2), then the report is marked failed, moved to the dead-letter queue, and Support Ops is alerted.
+- **Detail in SDD**: 3.2, 6.2
 
 ### 4.3 List and View Reports
 
 - **Traces to**: US-004, DR-005
 - **Priority**: P1
 - **Description**: Learners list and open their own reports.
-- **Rules**: only the owner can read (`user_id` from JWT must match, else `404`, not `403`, to avoid leaking IDs); reports older than 12 months are not returned; Zendesk status maps New → `received`, Open/Pending → `in_progress`, Solved → `resolved`; internal (private) agent notes are never mirrored or returned.
-- **Pagination**: cursor-based, 20 per page.
+- **Key rules**:
+  - Only the owner can read a report; others get "not found", never "forbidden".
+  - Reports older than 12 months are not shown.
+  - Zendesk status maps New → received, Open / Pending → in progress, Solved → resolved.
+  - Private agent notes are never mirrored or returned.
+  - Lists are paged by cursor, 20 per page.
+- **Detail in SDD**: 5.1, 6.3
 
 ### 4.4 Status Sync and Notifications
 
 - **Traces to**: US-005, DR-006
 - **Priority**: P1
-- **Description**: Apply Zendesk webhooks to local state and notify the learner.
-- **Rules**:
-  - The webhook endpoint verifies the Zendesk signature and timestamp (reject if older than 5 minutes); unknown tickets are ignored with `200`.
-  - Updates are idempotent: replies are keyed by `zendesk_comment_id`; status changes are applied only if the event timestamp is newer than `updated_at`.
-  - Notifications: acknowledgment (within 5 minutes), agent reply, resolved. In-app plus email; email is skipped if the learner has disabled it. Push notifications carry a deep link `learnsphere://feedback/{id}` (DR-006).
-  - Each notification is sent at most once per event (dedupe key = event type + object ID).
+- **Description**: Apply Zendesk updates to local state and notify the learner.
+- **Key rules**:
+  - Zendesk webhooks are accepted only with a valid signature, a recent timestamp, and an allowed source address.
+  - Updates are idempotent: replies and status changes can arrive twice or out of order without corrupting state.
+  - Notifications: acknowledgment within 5 minutes of submit, then agent replies and resolution, in the app and by email (email can be turned off by the learner). Push notifications deep-link to the report (DR-006).
+  - Each notification event is sent at most once.
+- **Detail in SDD**: 3.3, 6.4
 
 ### 4.5 Resolution Rating
 
 - **Traces to**: US-007
 - **Priority**: P2
 - **Description**: Record whether a resolution helped; "No" reopens the ticket.
-- **Rules**: allowed only when status is `resolved` and no rating exists for this resolution cycle; "No" sets Zendesk status to Open, adds tag `reopened`, assigns the senior-agent group, and sets local status `in_progress`; the response returns the message key for "Thanks, we're taking another look."
+- **Key rules**: A rating is allowed only for a resolved report and only once per resolution. "No" reopens the Zendesk ticket, tags it `reopened`, routes it to the senior-agent group, and moves the report back to in progress.
+- **Detail in SDD**: 3.4, 6.5
 
 ---
 
-## 5. Interface Specifications
+## 5. Interface Overview
 
 ### 5.1 API Overview
 
@@ -318,87 +272,23 @@ All endpoints are under `/v1`, require `Authorization: Bearer <JWT>` unless note
 | `/feedback/{id}/rating` | POST | Submit resolution rating | Learner (owner) | Yes (one per cycle) | 10 / min / user |
 | `/webhooks/zendesk` | POST | Zendesk status and reply events | Signed request | Yes | Zendesk only (IP allowlist) |
 
-### 5.2 Endpoint Details
+Request and response schemas are in the SDD and the generated OpenAPI file.
 
-#### `POST /v1/feedback/attachments/presign`
+### 5.2 Error Code Convention
 
-**Request**
-
-```json
-{ "contentType": "image/png", "sizeBytes": 2048000 }
-```
-
-**Response (200)**
-
-```json
-{
-  "attachmentKey": "feedback/{userId}/{uuid}.png",
-  "upload": { "url": "https://…s3…", "fields": { "key": "…", "policy": "…", "x-amz-signature": "…" } },
-  "expiresInSeconds": 300
-}
-```
-
-The POST policy limits `content-length-range` to 1–5,242,880 bytes and fixes the content type.
-
-#### `POST /v1/feedback`
-
-**Request**
-
-```json
-{
-  "idempotencyKey": "6f0c0e8e-…",
-  "issueType": "video_audio",
-  "description": "Video freezes at 3:42",
-  "replyEmail": "sam@example.com",
-  "attachmentKeys": ["feedback/…/a1.png"],
-  "context": {
-    "courseId": "sql-101", "lessonId": "l-004",
-    "deviceModel": "iPhone14,5", "osVersion": "iOS 17.4",
-    "appVersion": "5.8.0", "locale": "en-US",
-    "clientSubmittedAt": "2026-10-30T14:05:11Z"
-  }
-}
-```
-
-| Field | Type | Required | Validation |
-|-------|------|----------|------------|
-| idempotencyKey | uuid | Yes | Valid UUID v4 |
-| issueType | string | Yes | One of the 6 enum values |
-| description | string | Yes | 10–1,000 characters, trimmed |
-| replyEmail | string | Yes | Valid email, ≤ 254 chars |
-| attachmentKeys | string[] | No | ≤ 3; keys under the caller's prefix |
-| context.* | object | Yes | Fields in 3.2; `courseId` and `lessonId` optional |
-
-**Response (201)**
-
-```json
-{ "id": "b1c7…", "reference": "FB-20261030-0042", "status": "received" }
-```
-
-**Errors**
-
-| HTTP | Code | Condition | Client behavior (see DRD 8.3.1) |
-|------|------|-----------|-----------------------------------|
-| 400 | VAL-001 | Missing or invalid field (`details.field`) | Show the field's message; keep content |
-| 400 | VAL-002 | Attachment missing, wrong type, or over 5 MB | "Image is too large (max 5 MB)" or type message |
-| 401 | AUTH-001 | Token expired or invalid | Sign-in sheet, restore draft |
-| 403 | AUTH-002 | Not a paying plan | Entry point should be hidden; show generic error |
-| 429 | RATE-001 | 10 reports in the last 24 h | "You've reached today's limit…" |
-| 503 | SYS-001 | Service or database unavailable | Save draft, retry automatically |
-
-#### `GET /v1/feedback` and `GET /v1/feedback/{id}`
-
-List item: `id`, `reference`, `issueType`, `status`, `createdAt`, `hasUnreadUpdate`. Detail adds `description`, `attachments` (short-lived signed URLs, 5 minutes), `replies[]` (`agentFirstName`, `body`, `postedAt`), and `rating` (if any).
-
-#### `POST /v1/feedback/{id}/rating`
-
-Request: `{ "helped": false, "comment": "Still freezing" }`. Response `200` with the new `status` and `messageKey`. Errors: `409 STATE-001` if the report is not resolved or already rated; `404` if not found or not owned.
+| Item | Convention |
+|------|------------|
+| Format | `CATEGORY-NNN` (e.g., `VAL-001`, `AUTH-001`, `RATE-001`, `STATE-001`, `SYS-001`) |
+| Categories | VAL = validation, AUTH = authentication or authorization, RATE = limits, STATE = invalid state, NOTFOUND = not found, SYS = system |
+| HTTP mapping | VAL → 400, AUTH → 401 / 403, NOTFOUND → 404, STATE → 409, RATE → 429, SYS → 503 |
+| Wording | Clients map codes to message keys; the wording follows the DRD. The full catalog is in the SDD. |
+| Information leaks | Return 404, not 403, for resources the caller doesn't own |
 
 ### 5.3 Versioning and Compatibility
 
 - **Versioning scheme**: URL major version (`/v1`).
 - **Backward compatibility**: the response may gain fields; clients ignore unknown fields. Breaking changes require `/v2` and 6 months of overlap, because older app versions stay in use.
-- **Offline drafts**: drafts store the full request including the idempotency key and attachment upload state; the app resumes uploads, requests new presigned URLs if the old ones expired, then submits. The draft is sent within 60 s of connectivity returning (DR-004).
+- **Offline drafts**: drafts store the full request including the idempotency key and attachment upload state; the app resumes uploads, then submits, within 60 s of connectivity returning (DR-004).
 - **Deprecation policy**: announce in release notes; track old-version traffic before removal.
 
 ### 5.4 External Integrations
@@ -409,7 +299,7 @@ Request: `{ "helped": false, "comment": "Still freezing" }`. Response `200` with
 | SendGrid | API v3 | Emails | Account limits | Retry 3×; then log and alert if failure rate > 5% | Platform |
 | Push service | Internal API | Push notifications | Internal | Retry 3×; best effort | Platform |
 | Auth service | Internal API / JWT keys | Identity, plan type | Internal | Cached keys; request fails with 401 if unverifiable | Identity |
-| Learner API | Internal API | Certificate deadline (priority tag) | 500 ms timeout | Skip priority tag | Learner platform |
+| Learner API | Internal API | Certificate deadline (priority tag), called by the Zendesk worker | 500 ms timeout | Skip priority tag | Learner platform |
 | Amplitude | SDK (client side) | Funnel events | n/a | Fire and forget | Data |
 
 ---
@@ -418,20 +308,22 @@ Request: `{ "helped": false, "comment": "Still freezing" }`. Response `200` with
 
 ### 6.1 Topology
 
-| Queue | Producer | Consumer(s) | Payload | Ordering needed? |
-|-------|----------|-------------|---------|------------------|
-| `zendesk-sync` (+ `-dlq`) | Outbox publisher | Zendesk worker | `{ reportId, action: create \| reopen, attempt }` | No |
-| `notifications` (+ `-dlq`) | Submit path, webhook handler | Notification worker | `{ userId, reportId, type, dedupeKey }` | No |
-| `retention` | Scheduler | Retention job | `{ day }` | No |
+| Queue | Producer | Consumer(s) | Ordering needed? |
+|-------|----------|-------------|------------------|
+| `zendesk-sync` (+ `-dlq`) | Outbox publisher | Zendesk worker | No |
+| `notifications` (+ `-dlq`) | Submit path, webhook handler | Notification worker | No |
+| `retention` | Scheduler | Retention job | No |
 
-### 6.2 Reliability Rules
+Payload schemas are in the SDD (5.3).
 
-| Item | Rule |
-|------|------|
+### 6.2 Reliability Policy
+
+| Item | Policy |
+|------|--------|
 | Delivery guarantee | At-least-once; consumers are idempotent |
-| Retry (`zendesk-sync`) | 5 attempts with delays of 1, 5, 10, 20, and 24 minutes (≈ 1 hour total, per PRD 3.3.2). Retry on timeouts, 429 (honor `Retry-After`), and 5xx. Do not retry on 4xx validation errors. |
-| Dead-letter queue | After the last attempt: set `sync_state = failed`, move to DLQ, alert Support Ops (P2) when any message is in the DLQ for > 15 minutes. A replay tool re-queues DLQ messages after a fix. |
-| Idempotency | Worker first checks `zendesk_ticket_id`; Zendesk ticket creation includes the report `reference` as an external ID, and the worker searches by it before creating, so a retry never makes a second ticket. |
+| Retry (`zendesk-sync`) | 5 retries with increasing delays over about 1 hour (PRD 3.3.2). Retry on timeouts, 429, and 5xx; do not retry validation-type 4xx errors. Exact delays are in SDD 6.2. |
+| Dead-letter queue | After the last attempt: mark the report's sync failed, move the message to the DLQ, and alert Support Ops (P2) when any message stays in the DLQ for more than 15 minutes. A replay tool re-queues messages after a fix. |
+| Idempotency | Ticket creation is keyed by the report's reference, so a retry never makes a second ticket. |
 | Visibility | Learner sees the report as Received while sync is pending or failed; nothing is lost. |
 | Schema evolution | Additive payload changes only; breaking changes require a new queue name. |
 
@@ -485,9 +377,9 @@ Request: `{ "helped": false, "comment": "Still freezing" }`. Response `200` with
 | Performance | `POST /feedback` latency (excluding upload time) | p95 < 400 ms server-side; whole submit < 3 s at p95 on 4G (PRD 5.2) | Load test; device-lab test |
 | Performance | `GET /feedback` list | p95 < 300 ms | Load test |
 | Performance | Form open | < 500 ms (client; context from local state) | Device test |
-| Throughput | Burst submissions | Sustain 10 reports/s for 10 min without errors | Burst test in staging |
+| Throughput | Burst submissions | Accept 10 reports/s for 10 min without errors (reports are stored and queued) | Burst test in staging |
 | Availability | Feedback API | 99.9% monthly | Monitoring |
-| Reliability | Zendesk outage | No report lost; all synced within 1 hour of Zendesk recovery | Failure-injection test (block Zendesk in staging) |
+| Reliability | Zendesk outage | No report lost. At normal volume, all synced within 1 hour of Zendesk recovery. After the design burst, the backlog clears in about 2 hours (*estimate*; SDD DEV-001) | Failure-injection test (block Zendesk in staging); burst test |
 | Reliability | Acknowledgment | Sent within 5 minutes of submit for ≥ 99% of reports | Metric |
 | Scalability | Growth | Handles 5× launch volume with replica changes only | Capacity review, load test |
 | Capacity | Storage | ≈ 210 reports/day × (≈ 2 KB row + ≈ 1.2 MB screenshots on average × 35% attach rate) ≈ 90 MB/day ≈ 33 GB/year | Forecast, S3 metrics |
@@ -504,11 +396,11 @@ Request: `{ "helped": false, "comment": "Still freezing" }`. Response `200` with
 |-----|-----|-------|
 | Successful `POST /feedback` ÷ valid requests | 99.9% / 30 days | Page when burn rate would exhaust the budget in 24 h |
 | `POST /feedback` p95 latency | < 400 ms | Warn at > 600 ms for 5 min |
-| Reports with `sync_state = synced` within 15 min | ≥ 99% | Warn if < 97% for 30 min |
+| Reports with ticket synced within 15 min (normal volume) | ≥ 99% | Warn if < 97% for 30 min |
 | Webhook processing delay | p95 < 30 s | Warn at 60 s |
 | Acknowledgment sent within 5 min | ≥ 99% | Warn if < 95% for 30 min |
 
-### 9.2 Logging, Metrics, Tracing
+### 9.2 Logging, Metrics, and Tracing Requirements
 
 | Type | Requirement |
 |------|-------------|
@@ -516,6 +408,8 @@ Request: `{ "helped": false, "comment": "Still freezing" }`. Response `200` with
 | Metrics | Request rate, errors by code, latency; outbox lag; queue depth and age; DLQ size; Zendesk call latency and 429 count; reports by type and course (daily); spam rate; rate-limit hits |
 | Tracing | OpenTelemetry; trace ID propagated from the gateway through API, queue message attributes, and worker |
 | Dashboards | Service health (SRE); Support Ops view (ticket sync, DLQ, volume vs. staffing guardrail of 80 tickets/agent/day); Product view (top issues by type and course, replacing the Zendesk-report workaround) |
+
+Log fields, metric names, and span names are in the SDD (9).
 
 ### 9.3 Alerting and On-Call
 
@@ -529,7 +423,7 @@ Request: `{ "helped": false, "comment": "Still freezing" }`. Response `200` with
 
 ---
 
-## 10. Testing Plan
+## 10. Testing Strategy
 
 | Level | Scope | Target / criteria | Owner |
 |-------|-------|-------------------|-------|
@@ -542,6 +436,8 @@ Request: `{ "helped": false, "comment": "Still freezing" }`. Response `200` with
 | Resilience | Block Zendesk for 90 min; kill workers mid-send; duplicate submits and webhooks | No lost or duplicated reports; recovery as per 6.2 | Engineering / SRE |
 | Privacy | Deletion request end-to-end; retention job on test data | Data gone from DB, S3, and Zendesk personal fields within SLA | Engineering / Legal |
 
+Concrete test cases are in the SDD (10).
+
 **Mapping from PRD acceptance criteria**
 
 | PRD criterion | Test level | Notes |
@@ -551,7 +447,7 @@ Request: `{ "helped": false, "comment": "Still freezing" }`. Response `200` with
 | AC-3 Offline submission | E2E, resilience | Airplane-mode test; sends within 60 s of reconnect |
 | AC-4 Oversized screenshot | Unit, integration | Client check plus S3 policy rejection |
 | AC-5 Rate limit | Integration | 11th request returns `RATE-001`; no ticket |
-| AC-6 Status visible | Integration, E2E | Zendesk Open → `in_progress` |
+| AC-6 Status visible | Integration, E2E | Zendesk Open → in progress |
 | AC-7 Rating reopens ticket | Integration, E2E | Ticket reopened, tagged, senior queue |
 
 ---
@@ -594,6 +490,7 @@ Request: `{ "helped": false, "comment": "Still freezing" }`. Response `200` with
 | R-004 | Ticket volume exceeds Support capacity after launch | M | H | Phased rollout, guardrail dashboard, staffing review at day 60 | Lena Fischer |
 | R-005 | Duplicate tickets from retries | L | M | Idempotency key, external ID lookup before create | Engineering |
 | R-006 | Reference counter (`NNNN`) exceeds 9,999 per day | L | L | Format allows up to 5 digits if needed; alert at 5,000/day | Engineering |
+| R-007 | After a mass incident, the Zendesk backlog takes about 2 hours to clear (*estimate*) | L | M | Confirm the real Zendesk limit; evaluate batch ticket creation if the limit is lower; acknowledgments do not depend on Zendesk | Daniel Ortiz |
 
 ---
 
@@ -608,43 +505,41 @@ Request: `{ "helped": false, "comment": "Still freezing" }`. Response `200` with
 
 ---
 
-## 14. Agent Instructions
+## 14. Detailed Design Handoff
 
-### 14.1 Context Scoping
+### 14.1 SDD Ownership
 
-- **Start from**: `src/feedback/` (controllers, services), `src/zendesk/`, `src/notifications/`, `db/migrations/`.
-- **Read before coding**: `docs/adr/` (ADR-001 to ADR-006), `docs/engineering-standards.md`, OpenAPI file `openapi/feedback.yaml`.
-- **Do not touch**: Auth service client library, shared mail library, generated API client files.
+| SDD | Owner (engineer) | Components covered | Reviewer |
+|-----|------------------|--------------------|----------|
+| [In-App Feedback Center SDD](../SDD/SDD_Sample_In-App_Feedback.md) | Mei Tan (backend); Carlos Reyes (client module) | `feedback-service` API, workers, jobs; client feedback module (network and drafts) | Daniel Ortiz |
 
-### 14.2 Implementation Constraints
+### 14.2 Rules for Changes
 
-- **Required**: validate all inputs with the shared DTO validators; write a unit test with every rule in Section 4; use the idempotency key and outbox patterns as described; keep error codes from the catalog in 5.2.
-- **Prohibited**: calling Zendesk inside the submit request; logging descriptions, emails, or file names; adding dependencies without approval; building SQL from strings; storing secrets in code or config files.
+- **Engineers may change freely** (in the SDD): module and class structure, field-level design, indexes, algorithms, configuration values, log and metric names, and test cases.
+- **Needs the tech lead's agreement** (and a TRD update): anything that changes the architecture, a decision in Section 2.4, security design, a target in Section 8, or an interface other teams depend on.
+- Every such change is recorded in the SDD's deviation log (SDD 12) and in this document's change log.
 
-### 14.3 Verification Commands
+### 14.3 Changes Since Approval
 
-```bash
-npm run lint
-npm run typecheck
-npm run test:unit
-npm run test:contract
-npm run test:integration
-npm run build
-```
+| ID | What changed | SDD reference | Approved by | Date |
+|----|--------------|---------------|-------------|------|
+| DEV-001 | Reliability target split: normal volume synced within 1 hour of Zendesk recovery; after the design burst, about 2 hours (*estimate*) | SDD 11, 12 | Daniel Ortiz | 2026-10-30 |
+| DEV-002 | Priority (certificate deadline) lookup moved from the submit request to the Zendesk worker | SDD 6.2, 12 | Daniel Ortiz | 2026-10-30 |
 
 ---
 
 ## 15. Review Checklist
 
 - [x] Every PRD/DRD requirement with a technical impact appears in 1.2
-- [x] Architecture diagram, components, and data model agree
-- [x] Every API has request, response, errors, auth, and rate limit defined
-- [x] Schemas and queue payloads are versioned; compatibility rules stated
+- [x] Architecture diagram, components, and data entities agree
+- [x] Every API has purpose, auth, idempotency, and rate limit defined
+- [x] Error code convention, versioning, and compatibility rules stated
 - [x] Failure paths specified (Zendesk outage, offline, duplicates, S3 failures)
 - [x] Threat model covers real data flows, each with a mitigation and a test
 - [x] Non-functional targets are numbers with a verification method
 - [x] SLOs, alerts, and runbooks exist for launch
 - [x] Rollout and rollback plans are written
+- [x] The SDD owner and the change rules are named (Section 14)
 - [ ] Open question 1 (screenshot auto-redaction) is still open; it does not block v1
 
 ---
@@ -657,7 +552,7 @@ npm run build
 |---|----------|-------|----------|------------|
 | 1 | Can we auto-redact obvious personal data in screenshots? | Daniel Ortiz | 2026-11-20 | Open; spike scheduled (same as PRD open question 2) |
 | 2 | What is the Zendesk plan's API rate limit? | Lena Fischer | 2026-11-02 | Open; design assumes 200 requests/min |
-| 3 | Should the priority tag (certificate deadline) read from the learner API at submit time or from a nightly sync? | Daniel Ortiz | 2026-11-06 | Resolved: read at submit with a 500 ms timeout; skip the tag on failure |
+| 3 | Should the priority tag (certificate deadline) read from the learner API at submit time or from a nightly sync? | Daniel Ortiz | 2026-11-06 | Resolved: read by the Zendesk worker when it creates the ticket, 500 ms timeout; skip the tag on failure (SDD DEV-002) |
 | 4 | Do we need cross-region replicas of the feedback database? | Platform architecture | 2026-11-13 | Open; single-region for v1, revisit at 100% rollout |
 
 ### 16.2 Glossary
@@ -665,6 +560,8 @@ npm run build
 | Term | Definition |
 |------|------------|
 | ADR | Architecture Decision Record: a short note capturing a design decision, the options considered, and why |
+| HLD / LLD | High-level design (this TRD) / low-level design (the SDD) |
+| SDD | Software Design Document: the engineers' detailed design, which also serves as the tech spec |
 | Outbox pattern | Writing a message to a database table in the same transaction as the data change, then publishing it, so neither is lost |
 | Idempotency key | A client-generated ID that lets the server recognize a repeated request and return the original result |
 | DLQ | Dead-letter queue: where messages go after all retries fail |
@@ -673,7 +570,7 @@ npm run build
 
 ### 16.3 References
 
-- PRD: In-App Feedback Center v1.0; DRD: In-App Feedback Center v1.0
+- PRD: In-App Feedback Center v1.0; DRD: In-App Feedback Center v1.0; SDD: In-App Feedback Center (in progress)
 - Zendesk API and webhook documentation (internal bookmarks)
 - Q3 2026 Support Operations report (internal)
 - Platform engineering standards and runbook templates (internal)
@@ -686,3 +583,4 @@ npm run build
 | v0.5 | 2026-10-14 | Daniel Ortiz | Added APIs, queues, and security sections |
 | v0.9 | 2026-10-22 | Daniel Ortiz | Added threat model, testing plan, rollout; Support Ops and Security review |
 | v1.0 | 2026-10-29 | Daniel Ortiz | Aligned with DRD v1.0 (offline drafts, error codes, tracking); approved |
+| v1.1 | 2026-10-30 | Daniel Ortiz | Detailed design moved to the SDD; reliability target amended after burst analysis (SDD DEV-001); priority lookup moved to the Zendesk worker (SDD DEV-002) |
