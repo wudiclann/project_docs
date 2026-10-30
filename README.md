@@ -91,6 +91,10 @@ All three samples describe the **same fictional feature**: an In-App Feedback Ce
 
 **Diagrams** use [Mermaid](https://mermaid.js.org), which renders on GitHub, in Notion, Obsidian, and VS Code (with a preview extension), and in the [Mermaid Live Editor](https://mermaid.live).
 
+## License
+
+Released under the [MIT License](LICENSE).
+
 ## Sources and credits
 
 These documents adapt ideas from the following projects, and add traceability between the three document types, extra guidance, and filled-in samples:
