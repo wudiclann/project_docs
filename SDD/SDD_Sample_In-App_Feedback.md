@@ -15,7 +15,7 @@
 | **Related DRD** | In-App Feedback Center DRD v1.0 (2026-10-28) |
 | **Related TRD** | In-App Feedback Center TRD v1.1 (2026-10-30) |
 | **Code repository** | `learnsphere/feedback-service`, `learnsphere/app` (feedback module) |
-| **API docs / schema docs** | `openapi/feedback.yaml` (generated from NestJS decorators); schema docs generated from `db/migrations/` |
+| **API docs / schema docs** | `openapi/feedback.yaml` (generated from NestJS decorators; sample copy: [openapi_Sample_In-App_Feedback.yaml](../API/openapi_Sample_In-App_Feedback.yaml)); published reference for callers: [API_Sample_In-App_Feedback.md](../API/API_Sample_In-App_Feedback.md); schema docs generated from `db/migrations/` |
 
 ---
 
@@ -356,7 +356,7 @@ Personal data columns: `user_id`, `description`, `reply_email`, `comment`, reply
 
 ### 5.1 Endpoints
 
-**OpenAPI file**: `openapi/feedback.yaml` (generated; takes precedence over examples here). All endpoints require a valid JWT unless noted.
+**OpenAPI file**: `openapi/feedback.yaml` (generated; takes precedence over examples here). Callers outside the team read the published [API reference](../API/API_Sample_In-App_Feedback.md), which is built from it, so this section keeps only design notes. All endpoints require a valid JWT unless noted.
 
 #### `POST /v1/feedback/attachments/presign`
 
@@ -438,7 +438,7 @@ Personal data columns: `user_id`, `description`, `reply_email`, `comment`, reply
 | 403 | AUTH-002 | Not a paying plan | `feedback.not_available` | Generic error (entry point should be hidden) |
 | 404 | NOTFOUND-001 | Report not found or not owned | `feedback.not_found` | Show not-found state |
 | 409 | STATE-001 | Rating not allowed (not resolved or already rated) | `feedback.rating.not_allowed` | Hide the rating card |
-| 429 | RATE-001 | 10 reports in the last 24 hours | `feedback.rate_limit` | "You've reached today's limit. Please try again tomorrow or email support." |
+| 429 | RATE-001 | 10 reports in the last 24 hours, or another endpoint limit in TRD 5.1 | `feedback.rate_limit` | "You've reached today's limit. Please try again tomorrow or email support." |
 | 503 | SYS-001 | Database or dependency unavailable | `feedback.unavailable` | Save draft, retry automatically |
 
 ### 5.3 Messages and Events

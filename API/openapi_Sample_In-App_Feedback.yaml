@@ -1,0 +1,578 @@
+# Sample OpenAPI file for the In-App Feedback Center (fictional).
+#
+# This is the source of truth that API_Sample_In-App_Feedback.md is built from.
+# In a real project this file is generated from the code (for example, NestJS decorators)
+# and published with the build. It matches the PRD, DRD, TRD, and SDD samples:
+# endpoints, limits, error codes, and field rules are the same.
+#
+# Not included: POST /v1/webhooks/zendesk. Only Zendesk calls it (IP allowlist plus
+# signature), so it is documented in the SDD, not in the public reference.
+openapi: 3.0.3
+info:
+  title: LearnSphere Feedback API
+  version: 1.0.0
+  description: |
+    Lets the LearnSphere app and web client send in-app feedback reports, attach screenshots,
+    follow the support conversation, and rate the resolution.
+
+    Reports can be sent by paying learners only. All calls need a learner access token.
+  contact:
+    name: LearnSphere Platform Engineering
+    email: feedback-api@learnsphere.example
+servers:
+  - url: https://api.learnsphere.example/v1
+    description: Production
+  - url: https://api.staging.learnsphere.example/v1
+    description: Staging
+security:
+  - bearerAuth: []
+tags:
+  - name: Attachments
+    description: Upload screenshots before sending a report.
+  - name: Reports
+    description: Send, list, and read feedback reports.
+  - name: Ratings
+    description: Say whether the resolution helped.
+
+paths:
+  /feedback/attachments/presign:
+    post:
+      tags: [Attachments]
+      operationId: createAttachmentUpload
+      summary: Get a one-time upload form for a screenshot
+      description: |
+        Returns a presigned S3 upload form. Send the file to `upload.url` as a multipart form
+        with every entry of `upload.fields` first and the file last. The form accepts one
+        PNG or JPEG file of 1 byte to 5 MB, and expires after 5 minutes.
+        Limit: 30 requests per hour per user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PresignRequest'
+            example:
+              contentType: image/png
+              sizeBytes: 2048000
+      responses:
+        '200':
+          description: Upload form created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PresignResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+
+  /feedback:
+    post:
+      tags: [Reports]
+      operationId: createReport
+      summary: Send a feedback report
+      description: |
+        Creates a report and returns its reference number. Support receives it as a ticket
+        shortly afterwards; the ticket is created in the background, so this call does not
+        wait for it.
+
+        **Safe to retry.** Send the same `idempotencyKey` when you retry. If the first call
+        succeeded, you get the original `201` response and no second report is created.
+
+        Limits: 10 reports per 24 hours per user. Paying learners only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReportRequest'
+            example:
+              idempotencyKey: 6f0c0e8e-3b7a-4f1e-9c52-0d1f6a7b8c90
+              issueType: video_audio
+              description: Video freezes at 3:42
+              replyEmail: sam@example.com
+              attachmentKeys:
+                - feedback/0b6d1f0a-52c1-4e4b-8d0a-77a1c0d9e001/a1b2c3d4-0000-4000-8000-000000000001.png
+              context:
+                courseId: sql-101
+                lessonId: l-004
+                deviceModel: iPhone14,5
+                osVersion: iOS 17.4
+                appVersion: 5.8.0
+                locale: en-US
+                clientSubmittedAt: '2026-10-30T14:05:11Z'
+      responses:
+        '201':
+          description: Report accepted (or the original response, for a repeated idempotency key).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateReportResponse'
+              example:
+                id: b1c7e5d2-8a40-4c3e-9f11-2a6d5e0c7b33
+                reference: FB-20261030-0042
+                status: received
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/NotAvailable'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+    get:
+      tags: [Reports]
+      operationId: listReports
+      summary: List your reports
+      description: |
+        Returns your reports from the last 12 months, newest first, 20 per page.
+        Pass the `nextCursor` value from one page as `cursor` to get the next.
+        Limit: 60 requests per minute per user.
+      parameters:
+        - name: cursor
+          in: query
+          required: false
+          description: Opaque value from the previous page's `nextCursor`. Omit for the first page.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: One page of reports.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportList'
+              example:
+                items:
+                  - id: b1c7e5d2-8a40-4c3e-9f11-2a6d5e0c7b33
+                    reference: FB-20261030-0042
+                    issueType: video_audio
+                    status: in_progress
+                    createdAt: '2026-10-30T14:05:12Z'
+                    hasUnreadUpdate: true
+                nextCursor: null
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+
+  /feedback/{id}:
+    get:
+      tags: [Reports]
+      operationId: getReport
+      summary: Read one report with its replies
+      description: |
+        Returns the report, support replies, and your rating if you gave one.
+        Reading a report marks its updates as seen (`hasUnreadUpdate` becomes `false`).
+        Screenshot links are valid for 5 minutes.
+        A report that does not exist, is older than 12 months, or belongs to someone else
+        returns `404`. Limit: 60 requests per minute per user.
+      parameters:
+        - $ref: '#/components/parameters/ReportId'
+      responses:
+        '200':
+          description: The report.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportDetail'
+              example:
+                id: b1c7e5d2-8a40-4c3e-9f11-2a6d5e0c7b33
+                reference: FB-20261030-0042
+                issueType: video_audio
+                status: resolved
+                createdAt: '2026-10-30T14:05:12Z'
+                hasUnreadUpdate: false
+                description: Video freezes at 3:42
+                attachments:
+                  - url: https://files.learnsphere.example/feedback/a1b2c3d4.png?X-Amz-Expires=300
+                    contentType: image/png
+                replies:
+                  - agentFirstName: Maya
+                    body: Thanks for the report. We fixed a playback issue in app 5.8.1. Please update and try again.
+                    postedAt: '2026-10-30T16:40:00Z'
+                rating: null
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+
+  /feedback/{id}/rating:
+    post:
+      tags: [Ratings]
+      operationId: rateResolution
+      summary: Say whether the resolution helped
+      description: |
+        Allowed once per resolution, and only while the report is `resolved`.
+        `helped: true` keeps the report resolved. `helped: false` reopens it: the status
+        changes to `in_progress` and support picks it up again.
+        If a reopened report is resolved again, you can rate it again.
+        Limit: 10 requests per minute per user.
+      parameters:
+        - $ref: '#/components/parameters/ReportId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RatingRequest'
+            example:
+              helped: false
+              comment: Still freezing
+      responses:
+        '200':
+          description: Rating saved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RatingResponse'
+              example:
+                status: in_progress
+                messageKey: feedback.rating.reopened
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/RatingNotAllowed'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '503':
+          $ref: '#/components/responses/Unavailable'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: 'Learner access token from the LearnSphere sign-in flow, sent as `Authorization: Bearer <token>`.'
+
+  parameters:
+    ReportId:
+      name: id
+      in: path
+      required: true
+      description: Report ID returned when the report was created.
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    IssueType:
+      type: string
+      enum: [video_audio, quiz_grading, course_content, billing, app_bug, other]
+    Status:
+      type: string
+      description: |
+        `received` (shown as Received), `in_progress` (In progress), or `resolved` (Resolved).
+      enum: [received, in_progress, resolved]
+
+    PresignRequest:
+      type: object
+      required: [contentType, sizeBytes]
+      properties:
+        contentType:
+          type: string
+          enum: [image/png, image/jpeg]
+        sizeBytes:
+          type: integer
+          minimum: 1
+          maximum: 5242880
+    PresignResponse:
+      type: object
+      required: [attachmentKey, upload, expiresInSeconds]
+      properties:
+        attachmentKey:
+          type: string
+          description: Pass this value in `attachmentKeys` when you create the report.
+          example: feedback/0b6d1f0a-52c1-4e4b-8d0a-77a1c0d9e001/a1b2c3d4-0000-4000-8000-000000000001.png
+        upload:
+          type: object
+          required: [url, fields]
+          properties:
+            url:
+              type: string
+              format: uri
+            fields:
+              type: object
+              additionalProperties:
+                type: string
+              description: Form fields to send with the file, exactly as returned.
+        expiresInSeconds:
+          type: integer
+          example: 300
+
+    ReportContext:
+      type: object
+      required: [deviceModel, osVersion, appVersion, locale, clientSubmittedAt]
+      properties:
+        courseId:
+          type: string
+          description: Send both `courseId` and `lessonId`, or neither.
+        lessonId:
+          type: string
+        deviceModel:
+          type: string
+          minLength: 1
+        osVersion:
+          type: string
+          minLength: 1
+        appVersion:
+          type: string
+          minLength: 1
+        locale:
+          type: string
+          minLength: 1
+        clientSubmittedAt:
+          type: string
+          format: date-time
+          description: When the learner pressed Send on the device (ISO 8601).
+    CreateReportRequest:
+      type: object
+      required: [idempotencyKey, issueType, description, replyEmail, context]
+      properties:
+        idempotencyKey:
+          type: string
+          format: uuid
+          description: A UUID v4 created when the form opens. Reuse it on every retry of the same report.
+        issueType:
+          $ref: '#/components/schemas/IssueType'
+        description:
+          type: string
+          minLength: 10
+          maxLength: 1000
+          description: 10 to 1,000 characters after trimming spaces.
+        replyEmail:
+          type: string
+          format: email
+          maxLength: 254
+        attachmentKeys:
+          type: array
+          maxItems: 3
+          items:
+            type: string
+          description: Keys from the upload step. Each must belong to the caller.
+        context:
+          $ref: '#/components/schemas/ReportContext'
+    CreateReportResponse:
+      type: object
+      required: [id, reference, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        reference:
+          type: string
+          description: Reference number shown to the learner, `FB-YYYYMMDD-NNNN` (UTC date).
+          example: FB-20261030-0042
+        status:
+          $ref: '#/components/schemas/Status'
+
+    ReportSummary:
+      type: object
+      required: [id, reference, issueType, status, createdAt, hasUnreadUpdate]
+      properties:
+        id:
+          type: string
+          format: uuid
+        reference:
+          type: string
+        issueType:
+          $ref: '#/components/schemas/IssueType'
+        status:
+          $ref: '#/components/schemas/Status'
+        createdAt:
+          type: string
+          format: date-time
+        hasUnreadUpdate:
+          type: boolean
+          description: True if the report changed since the learner last opened it.
+    ReportList:
+      type: object
+      required: [items, nextCursor]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportSummary'
+        nextCursor:
+          type: string
+          nullable: true
+          description: Pass as `cursor` to get the next page. `null` on the last page.
+    Attachment:
+      type: object
+      required: [url, contentType]
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Signed link, valid for 5 minutes.
+        contentType:
+          type: string
+          enum: [image/png, image/jpeg]
+    Reply:
+      type: object
+      required: [agentFirstName, body, postedAt]
+      properties:
+        agentFirstName:
+          type: string
+        body:
+          type: string
+        postedAt:
+          type: string
+          format: date-time
+    Rating:
+      type: object
+      required: [helped, createdAt]
+      properties:
+        helped:
+          type: boolean
+        comment:
+          type: string
+          maxLength: 300
+        createdAt:
+          type: string
+          format: date-time
+    ReportDetail:
+      allOf:
+        - $ref: '#/components/schemas/ReportSummary'
+        - type: object
+          required: [description, attachments, replies, rating]
+          properties:
+            description:
+              type: string
+            attachments:
+              type: array
+              items:
+                $ref: '#/components/schemas/Attachment'
+            replies:
+              type: array
+              description: Public replies from support, oldest first.
+              items:
+                $ref: '#/components/schemas/Reply'
+            rating:
+              allOf:
+                - $ref: '#/components/schemas/Rating'
+              nullable: true
+              description: Your rating for the current resolution, or `null`.
+
+    RatingRequest:
+      type: object
+      required: [helped]
+      properties:
+        helped:
+          type: boolean
+        comment:
+          type: string
+          maxLength: 300
+          description: Optional. Up to 300 characters.
+    RatingResponse:
+      type: object
+      required: [status, messageKey]
+      properties:
+        status:
+          $ref: '#/components/schemas/Status'
+        messageKey:
+          type: string
+          enum: [feedback.rating.thanks, feedback.rating.reopened]
+
+    Error:
+      type: object
+      required: [code, messageKey]
+      properties:
+        code:
+          type: string
+          description: Stable code in the form `CATEGORY-NNN`. Use this in your code, not the message.
+          example: VAL-001
+        messageKey:
+          type: string
+          description: Key for the learner-facing wording. The app maps it to translated text.
+          example: feedback.validation.description
+        details:
+          type: object
+          additionalProperties: true
+          description: Extra facts. For `VAL-001`, `details.field` names the invalid field.
+
+  responses:
+    ValidationError:
+      description: |
+        `VAL-001`: a field is missing or invalid (`details.field` names it).
+        `VAL-002`: an attachment is missing, the wrong type, not yours, too many, or over 5 MB.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: VAL-001
+            messageKey: feedback.validation.description
+            details:
+              field: description
+    Unauthorized:
+      description: '`AUTH-001`: the token is missing, expired, or invalid. Sign in again.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: AUTH-001
+            messageKey: auth.expired
+    NotAvailable:
+      description: '`AUTH-002`: the account is not on a paying plan.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: AUTH-002
+            messageKey: feedback.not_available
+    NotFound:
+      description: '`NOTFOUND-001`: no such report, or it belongs to someone else.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: NOTFOUND-001
+            messageKey: feedback.not_found
+    RatingNotAllowed:
+      description: '`STATE-001`: the report is not resolved, or this resolution is already rated.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: STATE-001
+            messageKey: feedback.rating.not_allowed
+    RateLimited:
+      description: '`RATE-001`: a request limit was reached. Wait before trying again.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: RATE-001
+            messageKey: feedback.rate_limit
+    Unavailable:
+      description: '`SYS-001`: the service is temporarily unavailable. Retry with backoff.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: SYS-001
+            messageKey: feedback.unavailable

@@ -15,7 +15,7 @@
 | **关联 DRD** | 应用内反馈中心 DRD v1.0（2026-10-28） |
 | **关联 TRD** | 应用内反馈中心 TRD v1.1（2026-10-30） |
 | **代码仓库** | `learnsphere/feedback-service`、`learnsphere/app`（反馈模块） |
-| **API 文档 / Schema 文档** | `openapi/feedback.yaml`（由 NestJS 装饰器生成）；schema 文档由 `db/migrations/` 生成 |
+| **API 文档 / Schema 文档** | `openapi/feedback.yaml`（由 NestJS 装饰器生成；示例副本：[openapi_Sample_In-App_Feedback.yaml](../API/openapi_Sample_In-App_Feedback.yaml)）；面向调用方的已发布参考文档：[API_Sample_In-App_Feedback_zh.md](../API/API_Sample_In-App_Feedback_zh.md)；schema 文档由 `db/migrations/` 生成 |
 
 ---
 
@@ -356,7 +356,7 @@ CREATE TABLE feedback.outbox (
 
 ### 5.1 端点
 
-**OpenAPI 文件**：`openapi/feedback.yaml`（自动生成；与此处示例不一致时以它为准）。除非另有说明，所有端点都需要有效的 JWT。
+**OpenAPI 文件**：`openapi/feedback.yaml`（自动生成；与此处示例不一致时以它为准）。团队之外的调用方阅读由它生成的已发布 [API 参考文档](../API/API_Sample_In-App_Feedback_zh.md)，所以本节只保留设计说明。除非另有说明，所有端点都需要有效的 JWT。
 
 #### `POST /v1/feedback/attachments/presign`
 
@@ -438,7 +438,7 @@ CREATE TABLE feedback.outbox (
 | 403 | AUTH-002 | 非付费套餐 | `feedback.not_available` | 通用错误（入口本应隐藏） |
 | 404 | NOTFOUND-001 | 反馈不存在或不属于调用者 | `feedback.not_found` | 显示未找到状态 |
 | 409 | STATE-001 | 不允许评价（未解决或已评价） | `feedback.rating.not_allowed` | 隐藏评价卡片 |
-| 429 | RATE-001 | 最近 24 小时已有 10 条反馈 | `feedback.rate_limit` | "You've reached today's limit. Please try again tomorrow or email support." |
+| 429 | RATE-001 | 最近 24 小时已有 10 条反馈，或达到 TRD 5.1 中其他端点的限制 | `feedback.rate_limit` | "You've reached today's limit. Please try again tomorrow or email support." |
 | 503 | SYS-001 | 数据库或依赖不可用 | `feedback.unavailable` | 保存草稿，自动重试 |
 
 ### 5.3 消息与事件

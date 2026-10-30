@@ -178,7 +178,7 @@ For each section: **what it's for**, **what to write**, **tips**, and **common m
 **What it's for:** The exact contract between this code and its callers.
 
 **Write:**
-- **Endpoints** (5.1): link the generated OpenAPI file; add who can call it, side effects, and special rules. If you have no generated file, give request, response, and validation per endpoint.
+- **Endpoints** (5.1): link the generated OpenAPI file; add who can call it, side effects, and special rules. If you have no generated file, give request, response, and validation per endpoint. If callers outside your team use the API, they read the published API reference built from that file ([API_Guide.md](../API/API_Guide.md)); link to it and don't copy it.
 - **Error catalog** (5.2): HTTP status, code, condition, message key, and what the client does.
 - **Messages and events** (5.3): payload schemas, producer, consumer, ordering, size, version.
 

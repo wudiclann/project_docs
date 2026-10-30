@@ -11,7 +11,7 @@
 | **Related DRD** | [Link, with version] |
 | **Related TRD** | [Link, with the approved version this SDD is based on] |
 | **Code repository** | [Link] |
-| **API docs / schema docs** | [Links to generated OpenAPI and schema docs] |
+| **API docs / schema docs** | [Links to the generated OpenAPI file, the published API reference (if callers outside the team need one), and schema docs] |
 
 > **How to use this template**
 > - The SDD is the **low-level design** and the team's **tech spec**. The tech lead's **TRD** sets the approved architecture; the SDD says exactly how each part is built. Every project has one.
@@ -170,6 +170,8 @@ CREATE TABLE [table_name] (
 > If an OpenAPI file is generated from code, link it and list only what the file can't say (permissions, side effects, special rules). Otherwise fill in one block per endpoint.
 
 **OpenAPI file**: [Link]
+
+**Published API reference** (for callers outside the team, if any): [Link]. Link to it; don't copy it here.
 
 #### `[METHOD] /v1/[resource]`
 
