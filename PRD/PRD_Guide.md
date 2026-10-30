@@ -6,8 +6,6 @@ This guide explains what a Product Requirements Document (PRD) is, how to use th
 - [PRD_Template.md](PRD_Template.md): the blank template to copy and fill in
 - [PRD_Sample_In-App_Feedback.md](PRD_Sample_In-App_Feedback.md): a completed example, so you can see what "good" looks like. It is fictional and describes a mobile/web subscription product, so treat its tech stack and integrations as illustrations, not defaults.
 
-*Structure adapted from [PRD-Writer](https://github.com/xx235300/PRD-Writer) (MIT license).*
-
 ---
 
 ## Part 1: PRD Basics

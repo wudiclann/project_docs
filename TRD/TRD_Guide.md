@@ -7,8 +7,6 @@ This guide explains what a Technical Requirements Document (TRD) is, how to use 
 - [TRD_Sample_In-App_Feedback.md](TRD_Sample_In-App_Feedback.md): a completed example, so you can see what "good" looks like. It is fictional and matches the PRD and DRD samples, so its stack, volumes, and thresholds are illustrations, not defaults.
 - [PRD_Guide.md](../PRD/PRD_Guide.md) and [DRD_Guide.md](../DRD/DRD_Guide.md): the documents the TRD builds on.
 
-*Structure adapted from the TRD templates in [best-prd-template](https://github.com/SriSatyaLokesh/best-prd-template), extended with PRD/DRD traceability, per-feature technical specs, a fuller threat model, data lifecycle, and a review checklist.*
-
 ---
 
 ## Part 1: TRD Basics

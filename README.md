@@ -78,6 +78,16 @@ Describes how the requirements will be built and operated.
 - **Guide** covers how to size the work, record decisions, design for failure, and set measurable targets.
 - **Sample:** [TRD_Sample_In-App_Feedback.md](TRD/TRD_Sample_In-App_Feedback.md)
 
+## 中文版 (Chinese versions)
+
+Every file has a Chinese translation next to it, named with a `_zh` suffix (for example `PRD/PRD_Template_zh.md`). The Chinese files link to each other, not to the English ones. Product UI strings inside the samples (for example "Please choose an issue type") stay in English because the sample product launches in English.
+
+| | 模板 Template | 指南 Guide | 示例 Sample |
+|---|---|---|---|
+| PRD | [PRD_Template_zh.md](PRD/PRD_Template_zh.md) | [PRD_Guide_zh.md](PRD/PRD_Guide_zh.md) | [PRD_Sample_In-App_Feedback_zh.md](PRD/PRD_Sample_In-App_Feedback_zh.md) |
+| DRD | [DRD_Template_zh.md](DRD/DRD_Template_zh.md) | [DRD_Guide_zh.md](DRD/DRD_Guide_zh.md) | [DRD_Sample_In-App_Feedback_zh.md](DRD/DRD_Sample_In-App_Feedback_zh.md) |
+| TRD | [TRD_Template_zh.md](TRD/TRD_Template_zh.md) | [TRD_Guide_zh.md](TRD/TRD_Guide_zh.md) | [TRD_Sample_In-App_Feedback_zh.md](TRD/TRD_Sample_In-App_Feedback_zh.md) |
+
 ## About the samples
 
 All three samples describe the **same fictional feature**: an In-App Feedback Center for "LearnSphere", an online learning platform. This lets you follow one idea from requirement to design to implementation. The company, people, and numbers are invented, and the tech stack and integrations are illustrations, not recommendations.
@@ -94,11 +104,3 @@ All three samples describe the **same fictional feature**: an In-App Feedback Ce
 ## License
 
 Released under the [MIT License](LICENSE).
-
-## Sources and credits
-
-These documents adapt ideas from the following projects, and add traceability between the three document types, extra guidance, and filled-in samples:
-
-- PRD structure: [PRD-Writer](https://github.com/xx235300/PRD-Writer) (MIT)
-- DRD structure: ["交互设计文档怎么写" on woshipm.com](https://www.woshipm.com/ucd/4342952.html)
-- TRD structure: [best-prd-template](https://github.com/SriSatyaLokesh/best-prd-template)

@@ -7,8 +7,6 @@ This guide explains what a Design Requirement Document (DRD) is, how to use the 
 - [DRD_Sample_In-App_Feedback.md](DRD_Sample_In-App_Feedback.md): a completed example, so you can see what "good" looks like. It is fictional and matches the PRD sample, so its platforms and rules are illustrations, not defaults.
 - [PRD_Guide.md](../PRD/PRD_Guide.md): the PRD guide. The DRD starts where the PRD ends.
 
-*Structure adapted from the interaction design document (DRD) outline in ["交互设计文档怎么写" on woshipm.com](https://www.woshipm.com/ucd/4342952.html), extended with traceability to the PRD, page states, accessibility, and tracking.*
-
 ---
 
 ## Part 1: DRD Basics
