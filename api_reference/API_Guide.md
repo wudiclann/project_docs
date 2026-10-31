@@ -6,7 +6,7 @@ This guide explains what an API reference (API doc) is, how it relates to the SD
 - [API_Template.md](API_Template.md): the blank template to copy and fill in
 - [API_Sample_In-App_Feedback.md](API_Sample_In-App_Feedback.md): a completed example, so you can see what "good" looks like. It is fictional and matches the PRD, DRD, TRD, and SDD samples, so its names and numbers are illustrations, not defaults.
 - [openapi_Sample_In-App_Feedback.yaml](openapi_Sample_In-App_Feedback.yaml): the OpenAPI file the sample reference is built from
-- [SDD_Guide.md](../SDD/SDD_Guide.md): the detailed design that sits behind the API
+- [SDD_Guide.md](../software_design_document/SDD_Guide.md): the detailed design that sits behind the API
 
 ---
 

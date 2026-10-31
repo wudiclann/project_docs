@@ -1,6 +1,6 @@
 # 应用内反馈中心 — 软件设计文档（SDD）
 
-> **示例文档。**这是 `SDD_Template_zh.md` 的一份虚构、完整填写的示例。它是 [TRD_Sample_In-App_Feedback_zh.md](../TRD/TRD_Sample_In-App_Feedback_zh.md) 之下的详细设计，并遵循 [PRD](../PRD/PRD_Sample_In-App_Feedback_zh.md) 和 [DRD](../DRD/DRD_Sample_In-App_Feedback_zh.md) 示例，因此产品（"LearnSphere"）、限制、名称和错误提示均保持一致。人物、数字和系统均为虚构；标注*估算*的数字只是猜测，需用实测值替换。产品界面文案（如 "Please choose an issue type"）保持英文原样，因为该产品首发仅支持英文。
+> **示例文档。**这是 `SDD_Template_zh.md` 的一份虚构、完整填写的示例。它是 [TRD_Sample_In-App_Feedback_zh.md](../technical_requirement_document/TRD_Sample_In-App_Feedback_zh.md) 之下的详细设计，并遵循 [PRD](../product_requirement_document/PRD_Sample_In-App_Feedback_zh.md) 和 [DRD](../design_requirement_document/DRD_Sample_In-App_Feedback_zh.md) 示例，因此产品（"LearnSphere"）、限制、名称和错误提示均保持一致。人物、数字和系统均为虚构；标注*估算*的数字只是猜测，需用实测值替换。产品界面文案（如 "Please choose an issue type"）保持英文原样，因为该产品首发仅支持英文。
 >
 > 本示例展示的是一份**进行中**的 SDD：因为项目尚未上线，第 14 章的实际构建说明是空的。
 
@@ -15,7 +15,7 @@
 | **关联 DRD** | 应用内反馈中心 DRD v1.0（2026-10-28） |
 | **关联 TRD** | 应用内反馈中心 TRD v1.1（2026-10-30） |
 | **代码仓库** | `learnsphere/feedback-service`、`learnsphere/app`（反馈模块） |
-| **API 文档 / Schema 文档** | `openapi/feedback.yaml`（由 NestJS 装饰器生成；示例副本：[openapi_Sample_In-App_Feedback.yaml](../API/openapi_Sample_In-App_Feedback.yaml)）；面向调用方的已发布参考文档：[API_Sample_In-App_Feedback_zh.md](../API/API_Sample_In-App_Feedback_zh.md)；schema 文档由 `db/migrations/` 生成 |
+| **API 文档 / Schema 文档** | `openapi/feedback.yaml`（由 NestJS 装饰器生成；示例副本：[openapi_Sample_In-App_Feedback.yaml](../api_reference/openapi_Sample_In-App_Feedback.yaml)）；面向调用方的已发布参考文档：[API_Sample_In-App_Feedback_zh.md](../api_reference/API_Sample_In-App_Feedback_zh.md)；schema 文档由 `db/migrations/` 生成 |
 
 ---
 
@@ -356,7 +356,7 @@ CREATE TABLE feedback.outbox (
 
 ### 5.1 端点
 
-**OpenAPI 文件**：`openapi/feedback.yaml`（自动生成；与此处示例不一致时以它为准）。团队之外的调用方阅读由它生成的已发布 [API 参考文档](../API/API_Sample_In-App_Feedback_zh.md)，所以本节只保留设计说明。除非另有说明，所有端点都需要有效的 JWT。
+**OpenAPI 文件**：`openapi/feedback.yaml`（自动生成；与此处示例不一致时以它为准）。团队之外的调用方阅读由它生成的已发布 [API 参考文档](../api_reference/API_Sample_In-App_Feedback_zh.md)，所以本节只保留设计说明。除非另有说明，所有端点都需要有效的 JWT。
 
 #### `POST /v1/feedback/attachments/presign`
 

@@ -5,7 +5,7 @@
 **配合以下文件使用：**
 - [DRD_Template_zh.md](DRD_Template_zh.md)：可复制并填写的空白模板
 - [DRD_Sample_In-App_Feedback_zh.md](DRD_Sample_In-App_Feedback_zh.md)：一份完整示例，让你看到"好的 DRD"是什么样子。示例是虚构的，与 PRD 示例相匹配，因此其中的平台和规则仅作说明，不是默认选项。
-- [PRD_Guide_zh.md](../PRD/PRD_Guide_zh.md)：PRD 指南。DRD 从 PRD 结束的地方开始。
+- [PRD_Guide_zh.md](../product_requirement_document/PRD_Guide_zh.md)：PRD 指南。DRD 从 PRD 结束的地方开始。
 
 ---
 

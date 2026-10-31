@@ -5,7 +5,7 @@ This guide explains what a Software Design Document (SDD) is, how it relates to 
 **Use it together with:**
 - [SDD_Template.md](SDD_Template.md): the blank template to copy and fill in
 - [SDD_Sample_In-App_Feedback.md](SDD_Sample_In-App_Feedback.md): a completed example, so you can see what "good" looks like. It is fictional and matches the PRD, DRD, and TRD samples, so its stack, numbers, and names are illustrations, not defaults.
-- [TRD_Guide.md](../TRD/TRD_Guide.md): the high-level design the SDD builds on.
+- [TRD_Guide.md](../technical_requirement_document/TRD_Guide.md): the high-level design the SDD builds on.
 
 ---
 
@@ -178,7 +178,7 @@ For each section: **what it's for**, **what to write**, **tips**, and **common m
 **What it's for:** The exact contract between this code and its callers.
 
 **Write:**
-- **Endpoints** (5.1): link the generated OpenAPI file; add who can call it, side effects, and special rules. If you have no generated file, give request, response, and validation per endpoint. If callers outside your team use the API, they read the published API reference built from that file ([API_Guide.md](../API/API_Guide.md)); link to it and don't copy it.
+- **Endpoints** (5.1): link the generated OpenAPI file; add who can call it, side effects, and special rules. If you have no generated file, give request, response, and validation per endpoint. If callers outside your team use the API, they read the published API reference built from that file ([API_Guide.md](../api_reference/API_Guide.md)); link to it and don't copy it.
 - **Error catalog** (5.2): HTTP status, code, condition, message key, and what the client does.
 - **Messages and events** (5.3): payload schemas, producer, consumer, ordering, size, version.
 

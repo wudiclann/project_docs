@@ -1,6 +1,6 @@
 # 应用内反馈中心 — 设计需求文档（DRD）
 
-> **示例文档。**这是 `DRD_Template_zh.md` 的一份虚构、完整填写的示例。它是 [PRD_Sample_In-App_Feedback_zh.md](../PRD/PRD_Sample_In-App_Feedback_zh.md) 的设计配套文档，因此产品（"LearnSphere"）、人物、限制和消息文案均与该 PRD 一致。线框图以简单的文字草图呈现；真实的 DRD 中它们会是设计工具里的灰度画板。产品界面文案（引号内的英文，如 "Please choose an issue type"）保持英文原样，因为该产品首发仅支持英文。
+> **示例文档。**这是 `DRD_Template_zh.md` 的一份虚构、完整填写的示例。它是 [PRD_Sample_In-App_Feedback_zh.md](../product_requirement_document/PRD_Sample_In-App_Feedback_zh.md) 的设计配套文档，因此产品（"LearnSphere"）、人物、限制和消息文案均与该 PRD 一致。线框图以简单的文字草图呈现；真实的 DRD 中它们会是设计工具里的灰度画板。产品界面文案（引号内的英文，如 "Please choose an issue type"）保持英文原样，因为该产品首发仅支持英文。
 
 | | |
 |---|---|

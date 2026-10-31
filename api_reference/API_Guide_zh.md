@@ -6,7 +6,7 @@
 - [API_Template_zh.md](API_Template_zh.md)：可复制并填写的空白模板
 - [API_Sample_In-App_Feedback_zh.md](API_Sample_In-App_Feedback_zh.md)：一份完整示例，让你看到"好的 API 文档"是什么样子。示例是虚构的，与 PRD、DRD、TRD、SDD 示例相匹配，因此其中的名称和数字仅作说明，不是默认选项。
 - [openapi_Sample_In-App_Feedback.yaml](openapi_Sample_In-App_Feedback.yaml)：示例参考文档所依据的 OpenAPI 文件
-- [SDD_Guide_zh.md](../SDD/SDD_Guide_zh.md)：API 背后的详细设计
+- [SDD_Guide_zh.md](../software_design_document/SDD_Guide_zh.md)：API 背后的详细设计
 
 ---
 

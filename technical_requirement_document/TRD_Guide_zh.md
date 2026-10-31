@@ -5,8 +5,8 @@
 **配合以下文件使用：**
 - [TRD_Template_zh.md](TRD_Template_zh.md)：可复制并填写的空白模板
 - [TRD_Sample_In-App_Feedback_zh.md](TRD_Sample_In-App_Feedback_zh.md)：一份完整示例，让你看到"好的 TRD"是什么样子。示例是虚构的，与 PRD、DRD 和 SDD 示例相匹配，因此其中的技术栈、量级和阈值仅作说明，不是默认选项。
-- [PRD_Guide_zh.md](../PRD/PRD_Guide_zh.md) 和 [DRD_Guide_zh.md](../DRD/DRD_Guide_zh.md)：TRD 所依托的文档。
-- [SDD_Guide_zh.md](../SDD/SDD_Guide_zh.md)：工程师在 TRD 之下撰写的详细设计。
+- [PRD_Guide_zh.md](../product_requirement_document/PRD_Guide_zh.md) 和 [DRD_Guide_zh.md](../design_requirement_document/DRD_Guide_zh.md)：TRD 所依托的文档。
+- [SDD_Guide_zh.md](../software_design_document/SDD_Guide_zh.md)：工程师在 TRD 之下撰写的详细设计。
 
 ---
 

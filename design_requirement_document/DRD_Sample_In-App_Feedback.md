@@ -1,6 +1,6 @@
 # In-App Feedback Center — Design Requirement Document (DRD)
 
-> **Sample document.** This is a fictional, filled-in example of `DRD_Template.md`. It is the design companion to [PRD_Sample_In-App_Feedback.md](../PRD/PRD_Sample_In-App_Feedback.md), so the product ("LearnSphere"), people, limits, and message text match that PRD. Wireframes are shown as simple text sketches; in a real DRD they would be grayscale frames in your design tool.
+> **Sample document.** This is a fictional, filled-in example of `DRD_Template.md`. It is the design companion to [PRD_Sample_In-App_Feedback.md](../product_requirement_document/PRD_Sample_In-App_Feedback.md), so the product ("LearnSphere"), people, limits, and message text match that PRD. Wireframes are shown as simple text sketches; in a real DRD they would be grayscale frames in your design tool.
 
 | | |
 |---|---|

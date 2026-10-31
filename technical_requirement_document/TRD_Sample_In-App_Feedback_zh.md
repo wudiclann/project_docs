@@ -1,6 +1,6 @@
 # 应用内反馈中心 — 技术需求文档（TRD）
 
-> **示例文档。**这是 `TRD_Template_zh.md` 的一份虚构、完整填写的示例。它是由技术负责人撰写的概要设计，位于 [PRD_Sample_In-App_Feedback_zh.md](../PRD/PRD_Sample_In-App_Feedback_zh.md) / [DRD_Sample_In-App_Feedback_zh.md](../DRD/DRD_Sample_In-App_Feedback_zh.md) 与工程师的详细设计 [SDD_Sample_In-App_Feedback_zh.md](../SDD/SDD_Sample_In-App_Feedback_zh.md) 之间。产品（"LearnSphere"）、人物、限制和技术栈均与这些文档一致。系统、量级和阈值均为虚构；凡属假设的数字，文中会注明。产品界面文案（引号内的英文）保持英文原样，因为该产品首发仅支持英文。
+> **示例文档。**这是 `TRD_Template_zh.md` 的一份虚构、完整填写的示例。它是由技术负责人撰写的概要设计，位于 [PRD_Sample_In-App_Feedback_zh.md](../product_requirement_document/PRD_Sample_In-App_Feedback_zh.md) / [DRD_Sample_In-App_Feedback_zh.md](../design_requirement_document/DRD_Sample_In-App_Feedback_zh.md) 与工程师的详细设计 [SDD_Sample_In-App_Feedback_zh.md](../software_design_document/SDD_Sample_In-App_Feedback_zh.md) 之间。产品（"LearnSphere"）、人物、限制和技术栈均与这些文档一致。系统、量级和阈值均为虚构；凡属假设的数字，文中会注明。产品界面文案（引号内的英文）保持英文原样，因为该产品首发仅支持英文。
 
 | | |
 |---|---|
@@ -511,7 +511,7 @@ stateDiagram-v2
 
 | SDD | 负责人（工程师） | 覆盖的组件 | 评审人 |
 |-----|------------------|--------------------|----------|
-| [应用内反馈中心 SDD](../SDD/SDD_Sample_In-App_Feedback_zh.md) | Mei Tan（后端）；Carlos Reyes（客户端模块） | `feedback-service` API、worker、任务；客户端反馈模块（网络和草稿） | Daniel Ortiz |
+| [应用内反馈中心 SDD](../software_design_document/SDD_Sample_In-App_Feedback_zh.md) | Mei Tan（后端）；Carlos Reyes（客户端模块） | `feedback-service` API、worker、任务；客户端反馈模块（网络和草稿） | Daniel Ortiz |
 
 ### 14.2 变更规则
 

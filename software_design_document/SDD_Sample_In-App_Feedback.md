@@ -1,6 +1,6 @@
 # In-App Feedback Center — Software Design Document (SDD)
 
-> **Sample document.** This is a fictional, filled-in example of `SDD_Template.md`. It is the detailed design that sits under [TRD_Sample_In-App_Feedback.md](../TRD/TRD_Sample_In-App_Feedback.md), and it follows the [PRD](../PRD/PRD_Sample_In-App_Feedback.md) and [DRD](../DRD/DRD_Sample_In-App_Feedback.md) samples, so the product ("LearnSphere"), limits, names, and error messages match. People, numbers, and systems are invented, and numbers marked *estimate* are guesses to be replaced by measurements. Product UI strings (for example "Please choose an issue type") stay in English because the sample product launches in English.
+> **Sample document.** This is a fictional, filled-in example of `SDD_Template.md`. It is the detailed design that sits under [TRD_Sample_In-App_Feedback.md](../technical_requirement_document/TRD_Sample_In-App_Feedback.md), and it follows the [PRD](../product_requirement_document/PRD_Sample_In-App_Feedback.md) and [DRD](../design_requirement_document/DRD_Sample_In-App_Feedback.md) samples, so the product ("LearnSphere"), limits, names, and error messages match. People, numbers, and systems are invented, and numbers marked *estimate* are guesses to be replaced by measurements. Product UI strings (for example "Please choose an issue type") stay in English because the sample product launches in English.
 >
 > This sample shows an SDD **in progress**: the as-built notes in Section 14 are empty because the project has not launched.
 
@@ -15,7 +15,7 @@
 | **Related DRD** | In-App Feedback Center DRD v1.0 (2026-10-28) |
 | **Related TRD** | In-App Feedback Center TRD v1.1 (2026-10-30) |
 | **Code repository** | `learnsphere/feedback-service`, `learnsphere/app` (feedback module) |
-| **API docs / schema docs** | `openapi/feedback.yaml` (generated from NestJS decorators; sample copy: [openapi_Sample_In-App_Feedback.yaml](../API/openapi_Sample_In-App_Feedback.yaml)); published reference for callers: [API_Sample_In-App_Feedback.md](../API/API_Sample_In-App_Feedback.md); schema docs generated from `db/migrations/` |
+| **API docs / schema docs** | `openapi/feedback.yaml` (generated from NestJS decorators; sample copy: [openapi_Sample_In-App_Feedback.yaml](../api_reference/openapi_Sample_In-App_Feedback.yaml)); published reference for callers: [API_Sample_In-App_Feedback.md](../api_reference/API_Sample_In-App_Feedback.md); schema docs generated from `db/migrations/` |
 
 ---
 
@@ -356,7 +356,7 @@ Personal data columns: `user_id`, `description`, `reply_email`, `comment`, reply
 
 ### 5.1 Endpoints
 
-**OpenAPI file**: `openapi/feedback.yaml` (generated; takes precedence over examples here). Callers outside the team read the published [API reference](../API/API_Sample_In-App_Feedback.md), which is built from it, so this section keeps only design notes. All endpoints require a valid JWT unless noted.
+**OpenAPI file**: `openapi/feedback.yaml` (generated; takes precedence over examples here). Callers outside the team read the published [API reference](../api_reference/API_Sample_In-App_Feedback.md), which is built from it, so this section keeps only design notes. All endpoints require a valid JWT unless noted.
 
 #### `POST /v1/feedback/attachments/presign`
 

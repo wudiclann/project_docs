@@ -1,6 +1,6 @@
 # In-App Feedback Center — Technical Requirements Document (TRD)
 
-> **Sample document.** This is a fictional, filled-in example of `TRD_Template.md`. It is the high-level design written by the tech lead, and it sits between [PRD_Sample_In-App_Feedback.md](../PRD/PRD_Sample_In-App_Feedback.md) / [DRD_Sample_In-App_Feedback.md](../DRD/DRD_Sample_In-App_Feedback.md) and the engineers' detailed design in [SDD_Sample_In-App_Feedback.md](../SDD/SDD_Sample_In-App_Feedback.md). The product ("LearnSphere"), people, limits, and tech stack match those documents. Systems, volumes, and thresholds are invented; where a number is an assumption, it says so. Product UI strings (for example "Please choose an issue type") stay in English because the sample product launches in English.
+> **Sample document.** This is a fictional, filled-in example of `TRD_Template.md`. It is the high-level design written by the tech lead, and it sits between [PRD_Sample_In-App_Feedback.md](../product_requirement_document/PRD_Sample_In-App_Feedback.md) / [DRD_Sample_In-App_Feedback.md](../design_requirement_document/DRD_Sample_In-App_Feedback.md) and the engineers' detailed design in [SDD_Sample_In-App_Feedback.md](../software_design_document/SDD_Sample_In-App_Feedback.md). The product ("LearnSphere"), people, limits, and tech stack match those documents. Systems, volumes, and thresholds are invented; where a number is an assumption, it says so. Product UI strings (for example "Please choose an issue type") stay in English because the sample product launches in English.
 
 | | |
 |---|---|
@@ -511,7 +511,7 @@ Concrete test cases are in the SDD (10).
 
 | SDD | Owner (engineer) | Components covered | Reviewer |
 |-----|------------------|--------------------|----------|
-| [In-App Feedback Center SDD](../SDD/SDD_Sample_In-App_Feedback.md) | Mei Tan (backend); Carlos Reyes (client module) | `feedback-service` API, workers, jobs; client feedback module (network and drafts) | Daniel Ortiz |
+| [In-App Feedback Center SDD](../software_design_document/SDD_Sample_In-App_Feedback.md) | Mei Tan (backend); Carlos Reyes (client module) | `feedback-service` API, workers, jobs; client feedback module (network and drafts) | Daniel Ortiz |
 
 ### 14.2 Rules for Changes
 

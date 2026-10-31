@@ -1,6 +1,6 @@
 # LearnSphere Feedback API — API Reference
 
-> **Sample document.** This is a fictional, filled-in example of `API_Template.md`. It is the reference that people **outside the feedback team** read: app and web developers, other LearnSphere teams, and QA. It is built from [openapi_Sample_In-App_Feedback.yaml](openapi_Sample_In-App_Feedback.yaml), and it matches the [PRD](../PRD/PRD_Sample_In-App_Feedback.md), [DRD](../DRD/DRD_Sample_In-App_Feedback.md), [TRD](../TRD/TRD_Sample_In-App_Feedback.md), and [SDD](../SDD/SDD_Sample_In-App_Feedback.md) samples, so the product ("LearnSphere"), limits, names, and error codes are the same. The company, URLs, and people are invented. Product UI strings (for example "You've reached today's limit") stay in English because the sample product launches in English.
+> **Sample document.** This is a fictional, filled-in example of `API_Template.md`. It is the reference that people **outside the feedback team** read: app and web developers, other LearnSphere teams, and QA. It is built from [openapi_Sample_In-App_Feedback.yaml](openapi_Sample_In-App_Feedback.yaml), and it matches the [PRD](../product_requirement_document/PRD_Sample_In-App_Feedback.md), [DRD](../design_requirement_document/DRD_Sample_In-App_Feedback.md), [TRD](../technical_requirement_document/TRD_Sample_In-App_Feedback.md), and [SDD](../software_design_document/SDD_Sample_In-App_Feedback.md) samples, so the product ("LearnSphere"), limits, names, and error codes are the same. The company, URLs, and people are invented. Product UI strings (for example "You've reached today's limit") stay in English because the sample product launches in English.
 >
 > It says **what the API does and how to call it**. How it is built (queues, retries, Zendesk, tables) is in the SDD and is not repeated here.
 
@@ -13,7 +13,7 @@
 | **Owner** | Feedback service team (Engineering), `feedback-api@learnsphere.example` |
 | **Last updated** | 2026-10-30 |
 | **Source of truth** | [openapi_Sample_In-App_Feedback.yaml](openapi_Sample_In-App_Feedback.yaml). If this page and the file differ, the file is right. |
-| **Design documents** | [PRD](../PRD/PRD_Sample_In-App_Feedback.md) v1.0 · [DRD](../DRD/DRD_Sample_In-App_Feedback.md) v1.0 · [TRD](../TRD/TRD_Sample_In-App_Feedback.md) v1.1 · [SDD](../SDD/SDD_Sample_In-App_Feedback.md) v0.3 |
+| **Design documents** | [PRD](../product_requirement_document/PRD_Sample_In-App_Feedback.md) v1.0 · [DRD](../design_requirement_document/DRD_Sample_In-App_Feedback.md) v1.0 · [TRD](../technical_requirement_document/TRD_Sample_In-App_Feedback.md) v1.1 · [SDD](../software_design_document/SDD_Sample_In-App_Feedback.md) v0.3 |
 
 ---
 

@@ -5,7 +5,7 @@ This guide explains what a Design Requirement Document (DRD) is, how to use the 
 **Use it together with:**
 - [DRD_Template.md](DRD_Template.md): the blank template to copy and fill in
 - [DRD_Sample_In-App_Feedback.md](DRD_Sample_In-App_Feedback.md): a completed example, so you can see what "good" looks like. It is fictional and matches the PRD sample, so its platforms and rules are illustrations, not defaults.
-- [PRD_Guide.md](../PRD/PRD_Guide.md): the PRD guide. The DRD starts where the PRD ends.
+- [PRD_Guide.md](../product_requirement_document/PRD_Guide.md): the PRD guide. The DRD starts where the PRD ends.
 
 ---
 

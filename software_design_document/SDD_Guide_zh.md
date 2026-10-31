@@ -5,7 +5,7 @@
 **配合以下文件使用：**
 - [SDD_Template_zh.md](SDD_Template_zh.md)：可复制并填写的空白模板
 - [SDD_Sample_In-App_Feedback_zh.md](SDD_Sample_In-App_Feedback_zh.md)：一份完整示例，让你看到"好的 SDD"是什么样子。示例是虚构的，与 PRD、DRD、TRD 示例相匹配，因此其中的技术栈、数字和名称仅作说明，不是默认选项。
-- [TRD_Guide_zh.md](../TRD/TRD_Guide_zh.md)：SDD 所依托的概要设计。
+- [TRD_Guide_zh.md](../technical_requirement_document/TRD_Guide_zh.md)：SDD 所依托的概要设计。
 
 ---
 
@@ -178,7 +178,7 @@ SDD 在 TRD 获批之后开始。不要从上到下依次填写；更好的顺�
 **作用：**这段代码与调用方之间的精确契约。
 
 **写什么：**
-- **端点**（5.1）：链接自动生成的 OpenAPI 文件；补充谁能调用、副作用和特殊规则。如果没有自动生成的文件，则为每个端点写请求、响应和校验。如果团队之外的调用方使用该 API，他们阅读的是由该文件生成的已发布 API 参考文档（[API_Guide_zh.md](../API/API_Guide_zh.md)）；链接过去即可，不要复制。
+- **端点**（5.1）：链接自动生成的 OpenAPI 文件；补充谁能调用、副作用和特殊规则。如果没有自动生成的文件，则为每个端点写请求、响应和校验。如果团队之外的调用方使用该 API，他们阅读的是由该文件生成的已发布 API 参考文档（[API_Guide_zh.md](../api_reference/API_Guide_zh.md)）；链接过去即可，不要复制。
 - **错误目录**（5.2）：HTTP 状态码、错误码、条件、消息 key，以及客户端的行为。
 - **消息与事件**（5.3）：载荷 schema、生产者、消费者、顺序、大小、版本。
 

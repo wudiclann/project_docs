@@ -5,8 +5,8 @@ This guide explains what a Technical Requirements Document (TRD) is, how it rela
 **Use it together with:**
 - [TRD_Template.md](TRD_Template.md): the blank template to copy and fill in
 - [TRD_Sample_In-App_Feedback.md](TRD_Sample_In-App_Feedback.md): a completed example, so you can see what "good" looks like. It is fictional and matches the PRD, DRD, and SDD samples, so its stack, volumes, and thresholds are illustrations, not defaults.
-- [PRD_Guide.md](../PRD/PRD_Guide.md) and [DRD_Guide.md](../DRD/DRD_Guide.md): the documents the TRD builds on.
-- [SDD_Guide.md](../SDD/SDD_Guide.md): the detailed design that the engineers write underneath the TRD.
+- [PRD_Guide.md](../product_requirement_document/PRD_Guide.md) and [DRD_Guide.md](../design_requirement_document/DRD_Guide.md): the documents the TRD builds on.
+- [SDD_Guide.md](../software_design_document/SDD_Guide.md): the detailed design that the engineers write underneath the TRD.
 
 ---
 

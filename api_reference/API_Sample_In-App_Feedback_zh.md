@@ -1,6 +1,6 @@
 # LearnSphere 反馈 API — API 参考文档
 
-> **示例文档。**这是 `API_Template_zh.md` 的一份虚构、完整填写的示例。它是**反馈团队之外的人**阅读的参考文档：App 和网页开发者、LearnSphere 其他团队以及 QA。它由 [openapi_Sample_In-App_Feedback.yaml](openapi_Sample_In-App_Feedback.yaml) 生成，并与 [PRD](../PRD/PRD_Sample_In-App_Feedback_zh.md)、[DRD](../DRD/DRD_Sample_In-App_Feedback_zh.md)、[TRD](../TRD/TRD_Sample_In-App_Feedback_zh.md) 和 [SDD](../SDD/SDD_Sample_In-App_Feedback_zh.md) 示例相匹配，因此产品（"LearnSphere"）、限制、名称和错误码均保持一致。公司、URL 和人物均为虚构。产品界面文案（如 "You've reached today's limit"）保持英文原样，因为该产品首发仅支持英文。
+> **示例文档。**这是 `API_Template_zh.md` 的一份虚构、完整填写的示例。它是**反馈团队之外的人**阅读的参考文档：App 和网页开发者、LearnSphere 其他团队以及 QA。它由 [openapi_Sample_In-App_Feedback.yaml](openapi_Sample_In-App_Feedback.yaml) 生成，并与 [PRD](../product_requirement_document/PRD_Sample_In-App_Feedback_zh.md)、[DRD](../design_requirement_document/DRD_Sample_In-App_Feedback_zh.md)、[TRD](../technical_requirement_document/TRD_Sample_In-App_Feedback_zh.md) 和 [SDD](../software_design_document/SDD_Sample_In-App_Feedback_zh.md) 示例相匹配，因此产品（"LearnSphere"）、限制、名称和错误码均保持一致。公司、URL 和人物均为虚构。产品界面文案（如 "You've reached today's limit"）保持英文原样，因为该产品首发仅支持英文。
 >
 > 它说明的是 **API 做什么、怎么调用**。它是怎么构建的（队列、重试、Zendesk、表）写在 SDD 里，这里不重复。
 
@@ -13,7 +13,7 @@
 | **负责人** | 反馈服务团队（工程部），`feedback-api@learnsphere.example` |
 | **最后更新** | 2026-10-30 |
 | **唯一事实来源** | [openapi_Sample_In-App_Feedback.yaml](openapi_Sample_In-App_Feedback.yaml)。本页与该文件不一致时，以该文件为准。 |
-| **设计文档** | [PRD](../PRD/PRD_Sample_In-App_Feedback_zh.md) v1.0 · [DRD](../DRD/DRD_Sample_In-App_Feedback_zh.md) v1.0 · [TRD](../TRD/TRD_Sample_In-App_Feedback_zh.md) v1.1 · [SDD](../SDD/SDD_Sample_In-App_Feedback_zh.md) v0.3 |
+| **设计文档** | [PRD](../product_requirement_document/PRD_Sample_In-App_Feedback_zh.md) v1.0 · [DRD](../design_requirement_document/DRD_Sample_In-App_Feedback_zh.md) v1.0 · [TRD](../technical_requirement_document/TRD_Sample_In-App_Feedback_zh.md) v1.1 · [SDD](../software_design_document/SDD_Sample_In-App_Feedback_zh.md) v0.3 |
 
 ---
 
